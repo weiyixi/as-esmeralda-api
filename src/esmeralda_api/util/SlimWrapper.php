@@ -11,14 +11,14 @@ class SlimWrapper extends \Slim\Slim{
     public function render($tpl, $params = array(), $status = NULL){
         $req = $this->request();
         $accept = $req->headers('Accept');
-        //if (stripos($accept, 'json')){
+        if (stripos($accept, 'json')){
             parent::render($tpl.".json", $params); 
             $resp = $this->response();
             $resp['Content-Type'] = 'application/json';
-        //}else{
-        //    parent::render($tpl.".htm", $params); 
-        //    $resp = $this->response();
-        //    $resp['Content-Type'] = 'text/html';
-        //}
+        }else{
+            parent::render($tpl.".htm", $params); 
+            $resp = $this->response();
+            $resp['Content-Type'] = 'text/html';
+        }
     }
 }
