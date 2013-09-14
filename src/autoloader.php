@@ -11,7 +11,6 @@ class Autoloader
     public static function autoload($className)
     {
         if (0 === strpos($className, self::NS, 0)) {
-            $className = str_replace(self::NS, '', $className);
             $fileName = __DIR__ . DIRECTORY_SEPARATOR;
             $fileName .= str_replace(self::SEPARATOR, DIRECTORY_SEPARATOR, $className).'.php';
             require_once $fileName;
