@@ -2,3 +2,4 @@
 /var/log/*
 /var/tpl
 /etc/*
+/composer.lock
