@@ -1,0 +1,30 @@
+{% for attr in attrs %}
+    {% set attr = attributeS.nlize(attr, anl) %}
+    <h2>
+        {{attr.name}}
+        {% if attr.selected %}
+        <a class="b_" href="{{sel.getUrl([attr.id])}}" data-ajax="false">
+                {LANG page_category_see_all}
+        </a>
+        {% endif %}
+    </h2>
+    <div>
+    {% for value in attributeS.getChildren(attr.id) %}
+        {% if value.total > 0 %}
+            {% set value = attributeS.nlize(value, anl) %}
+            {% set attrClass='' %}
+            {% if value.selected %}
+                {% set attrClass='class="nsSelected"' %}
+                {% set toAdd=[] %}
+                {% set toRemove=[value.id] %}
+            {% else %}
+                {% set toAdd=[value.id] %}
+                {% set toRemove=[] %}
+            {% endif %}
+            <p><a href="{{sel.getUrl(toRemove,toAdd)}}" {{attrClass}}>
+                {{value.value}}<span>({{value.total}})</span>
+            </a></p>
+        {% endif %}
+    {% endfor %}
+    </div>
+{% endfor %}

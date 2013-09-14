@@ -1,0 +1,38 @@
+{
+    "name": "blu3gui7ar/esmeralda-api",
+    "type": "project",
+    "keywords":["e-commerce", "rest"],
+    "authors": [
+        {
+            "name": "blu3gui7ar",
+            "email": "blu3gui7ar@gmail.com"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url":  "http://192.168.1.227/hwang/esmeralda.git"
+        }
+    ],
+    "require": {
+        "blu3gui7ar/esmeralda": "dev-master",
+        "pimple/pimple": "dev-master",
+        "slim/slim": "2.*",
+        "slim/views": "0.1.*",
+        "monolog/monolog": "*",
+        "flynsarmy/slim-monolog": "@dev",
+        "twig/twig": "1.*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "3.7.*",
+        "phpunit/php-invoker": "*"
+    },
+    "autoload": {
+        "psr-0" : {
+            "esmeralda_api\\" : "src/"
+        }
+    },
+    "archive": {
+        "exclude": ["/etc/env_config.php", "/var/*"]
+    }
+}           

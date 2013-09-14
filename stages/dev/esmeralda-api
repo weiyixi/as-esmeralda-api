@@ -1,0 +1,22 @@
+    server {
+        listen 8900;
+        server_name     api.esmeralda.com;
+
+        access_log  logs/access-esmeralda-dev.log main;
+
+        root           /Users/blu3gui7ar/work/projects/git-ws/esmeralda-api/src/api;
+        index           index.php index.html;
+
+        location /apis/ {
+            rewrite ^/apis/([^/]+)$ /$1.rest.php last;
+            rewrite ^/apis/([^/]+)/.*$ /$1.rest.php last;
+        }
+
+        location ~* .*\.php$ {
+            fastcgi_pass   127.0.0.1:9000;
+            fastcgi_index  index.php;
+            fastcgi_param  SCRIPT_FILENAME  /Users/blu3gui7ar/work/projects/git-ws/esmeralda-api/src/api$fastcgi_script_name;
+            include        fastcgi_params;
+        }
+    }
+

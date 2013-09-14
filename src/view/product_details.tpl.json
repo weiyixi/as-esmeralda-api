@@ -1,0 +1,79 @@
+{
+	"productList" : [
+{% for p in products %}
+{% set pnl = service.nlize(p, nls) %}
+		{
+			"id" : "{{ attribute(pnl,'id') }}",
+			"name" : "{{ attribute(pnl,'name') }}",
+			"urlName" : "{{ attribute(pnl,'urlName') }}",
+			"desc" : "{{ attribute(pnl,'des') }}",
+			"keywords" : "{{ attribute(pnl,'keywords') }}",
+			"details" : "{{ pnl.details | json }}",
+			"thumb" : "{{ attribute(pnl,'thumb') }}",
+			"price" : "{{ attribute(pnl,'price') }}",
+			"marketPrice" : "{{ attribute(pnl,'marketPrice') }}",
+			"priceOff" : "{{ attribute(pnl,'priceOff') }}",
+			"colorNo" : "{{ attribute(pnl,'colorNo') }}",
+			"commentsNo" : "{{ attribute(pnl,'commentsNo') }}",
+			"rating" : "{{ attribute(pnl,'rating') }}",
+			"isNew" : "{{ attribute(pnl,'isNew') }}",
+			"wrapPrice" : "{{ attribute(pnl,'wrapPrice') }}",
+			"weight" : "{{ attribute(pnl,'weight') }}",
+			"questionNo" : "{{ attribute(pnl,'questionNo') }}",
+			"modelCard" : "{{ attribute(pnl,'modelCard') }}",
+			"weeklyDeal" : "{{ attribute(pnl,'weeklyDeal') }}",
+			"catIds" : "{{ attribute(pnl,'catIds') }}",
+			"addTime" : "{{ attribute(pnl,'addTime') }}",
+			"updateTime" : "{{ attribute(pnl,'updateTime') }}",
+			"salesOrder" : "{{ attribute(pnl,'salesOrder') }}",
+			"goodsOrder" : "{{ attribute(pnl,'goodsOrder') }}",
+			"attributes" : [
+{% for key, values in pnl.attributes %}
+				{
+					"id" : "{{ key }}",
+					"name" : "{{ attrNls[key]['name'] }}",
+					"values" : [
+{%for value in values %}
+						{
+							"id" : "{{ value }}",
+							"value" : "{{ attrNls[value]['value'] }}"
+						}{% if loop.last == false %},{% endif %}
+
+{% endfor %}
+					]
+				}{% if loop.last == false %},{% endif %}
+
+{% endfor %}
+			],
+			"styles" : [
+{% for key, values in pnl.styles %}
+				{
+					"[{{ key }}]{{ styleNls[key]['value'] }}" : [
+{%for value in values %}
+						"[{{ value }}]{{ styleNls[value]['value'] }}"{% if loop.last == false %},{% endif %}
+
+{% endfor %}
+					]
+				}{% if loop.last == false %},{% endif %}
+
+{% endfor %}
+			],
+			"tags" : [
+{% for key, values in pnl.tags %}
+{%for value in tagNls[pnl.id] %}
+				"{{ value }}"{% if loop.last == false %},{% endif %}
+
+{% endfor %}
+{% endfor %}
+			],
+			"recommendation" : {
+{% for key, value in pnl.recommendation %}
+				"{{ key }}" : "{{ value }}"{% if loop.last == false %},{% endif %}
+
+{% endfor %}
+			}
+		}{% if loop.last == false %},{% endif %}
+
+{% endfor %}
+	]
+}

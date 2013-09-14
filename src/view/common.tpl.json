@@ -1,0 +1,15 @@
+{% macro render_object(object) %}
+{% set attrs = object.getAllAttrs() %}
+{% for key, attr in attrs %}
+	"{{key}}" : {% if attr is iterable %}[
+		{% for value in attr %}{ {{value}} },
+		{% endfor %}],
+	{% else %}"{{attr}}",{% endif %}
+
+{% endfor %}
+{% endmacro %}
+
+{
+{% import _self as commonM %}
+{{ commonM.render_object(object) }}
+}

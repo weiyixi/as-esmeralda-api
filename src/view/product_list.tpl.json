@@ -1,0 +1,10 @@
+{
+{% for domain, ids in productIds %}
+	"ids" : [
+{% for id in ids %}
+		"{{ id }}"{% if loop.last == false %},{% endif %}
+
+{% endfor %}
+	]
+{% endfor %}
+}

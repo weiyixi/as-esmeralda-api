@@ -1,0 +1,80 @@
+{% for p in products %}
+<div id="product-{{p.id}}" class="product">
+    product-{{p.id}}
+    <ul>
+        {% set pnl = service.nlize(p, nls) %}
+        <li>id : {{ attribute(pnl,'id') }}</li>
+        <li>name : {{ attribute(pnl,'name') }}</li>
+        <li>urlName : {{ attribute(pnl,'urlName') }}</li>
+        <li>desc : {{ attribute(pnl,'des') }}</li>
+        <li>keywords : {{ attribute(pnl,'keywords') }}</li>
+        <li>details : {{ attribute(pnl,'details') }}</li>
+        <li>thumb: {{ attribute(pnl,'thumb') }}</li>
+        <li>price : {{ attribute(pnl,'price') }}</li>
+        <li>marketPrice : {{ attribute(pnl,'marketPrice') }}</li>
+        <li>priceOff : {{ attribute(pnl,'priceOff') }}</li>
+        <li>colorNo : {{ attribute(pnl,'colorNo') }}</li>
+        <li>commentsNo : {{ attribute(pnl,'commentsNo') }}</li>
+        <li>rating : {{ attribute(pnl,'rating') }}</li>
+        
+        <li>isNew : {{ attribute(pnl,'isNew') }}</li>
+        <li>wrapPrice : {{ attribute(pnl,'wrapPrice') }}</li>
+        <li>weight : {{ attribute(pnl,'weight') }}</li>
+        <li>questionNo : {{ attribute(pnl,'questionNo') }}</li>
+        <li>modelCard : {{ attribute(pnl,'modelCard') }}</li>
+        <li>weeklyDeal : {{ attribute(pnl,'weeklyDeal') }}</li>
+        <li>catId : {{ attribute(pnl,'catId') }}</li>
+        <li>parentCatId : {{ attribute(pnl,'parentCatId') }}</li>
+        
+        <li>addTime : {{ attribute(pnl,'addTime') }}</li>
+        <li>updateTime : {{ attribute(pnl,'updateTime') }}</li>
+        <li>salesOrder : {{ attribute(pnl,'salesOrder') }}</li>
+        <li>goodsOrder : {{ attribute(pnl,'goodsOrder') }}</li>
+        
+        <li>attributes:
+            <ul>
+                {% for key, values in pnl.attributes %}
+                <li>[{{ key }}]{{ attrNls[key]['name'] }} : 
+                    {%for value in values %}
+                        [{{ value }}]{{ attrNls[value]['value'] }}, 
+                    {% endfor %}
+                </li>
+                {% endfor %}
+            </ul>
+        </li>
+        <li>styles:
+            <ul>
+                {% for key, values in pnl.styles %}
+                <li>[{{ key }}]{{ styleNls[key]['value'] }} : 
+                    {%for value in values %}
+                        [{{ value }}]{{ styleNls[value]['value'] }}, 
+                    {% endfor %}
+                </li>
+                {% endfor %}
+            </ul>
+        </li>
+        
+        <li>tags : 
+        	<ul>
+                {% for key, values in pnl.tags %}
+                <li>{%for value in tagNls[pnl.id] %}
+                        {{ value }}
+                    {% endfor %}
+                </li>
+                {% endfor %}
+            </ul>
+        </li>
+        
+        <li>recommendation : 
+        	<ul>
+                {% for key, value in pnl.recommendation %}
+                <li>[{{ key }}] : {{ value }}
+                </li>
+                {% endfor %}
+            </ul>
+        </li>
+        
+        
+    </ul>
+</div>
+{% endfor %}

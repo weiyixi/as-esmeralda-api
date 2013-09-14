@@ -1,0 +1,18 @@
+{% macro render_category(category) %}
+    <a nl-map="category-nl" nl-id="{{category.id}}" href="{{category.apiurl}}">
+        <span nl-map="category-nl" nl-id="{{category.id}}">{{category.name}}</span>
+    </a>
+    <ul class="cate-children">
+        {% for child in category.children %}
+        <li>
+            {% import _self as cateM %}
+            {{ cateM.render_category(child) }}
+        </li>
+        {% endfor %}
+    </ul>
+{% endmacro %}
+
+<div id="category-tree" class="catetree">
+    {% import _self as cateM %}
+    {{ cateM.render_category(category) }}
+</div>

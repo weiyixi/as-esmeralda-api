@@ -1,0 +1,23 @@
+{
+	"productList" : [
+{% for p in products %}
+{% set pnl = service.nlize(p, nls) %}
+		{
+			"id" : "{{ attribute(pnl,'id') }}",
+			"name" : "{{ attribute(pnl,'name') }}",
+			"urlName" : "{{ attribute(pnl,'urlName') }}",
+			"desc" : "{{ attribute(pnl,'des') }}",
+			"keywords" : "{{ attribute(pnl,'keywords') }}",
+			"details" : "{{ attribute(pnl,'details') }}",
+			"thumb" : "{{ attribute(pnl,'thumb') }}",
+			"price" : "{{ attribute(pnl,'price') }}",
+			"marketPrice" : "{{ attribute(pnl,'marketPrice') }}",
+			"priceOff" : "{{ attribute(pnl,'priceOff') }}",
+			"colorNo" : "{{ attribute(pnl,'colorNo') }}",
+			"commentsNo" : "{{ attribute(pnl,'commentsNo') }}",
+			"rating" : "{{ attribute(pnl,'rating') }}"
+		}{% if loop.last == false %},{% endif %}
+
+{% endfor %}
+	]
+}

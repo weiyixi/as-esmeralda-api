@@ -1,0 +1,39 @@
+{% macro render_object(object, service, nls) %}
+	{% for nl in nls %}
+    	{% set object = service.nlize(object, nl) %}
+    {% endfor %}
+	{% set attrs = object.getAllAttrs() %}
+		{% for id, attr in attrs %}
+     	<ul>
+      	{{id}}
+			{% if attr is iterable %}
+				{% for key, value in attr %}
+					<li>{{key}} : 
+					{% if value is iterable %}
+						{% for k, v in value %}
+							{ {{k}} =>
+							{% if v is iterable %}
+								{% for kk, vv in v %}
+									({{kk}},{{vv}}), 
+								{% endfor %}
+									}
+							{% else %}
+								{{v}} },
+							{% endif %}
+						{% endfor %}
+					{% else %}
+						{{ value }}
+					{% endif %}</li>
+				{% endfor %}
+			{% else %}
+				<li>{{ attr }}</li>
+			{% endif %}
+		</ul>
+	{% endfor %}
+    
+{% endmacro %}
+
+<div id="object-tree" class="object">
+    {% import _self as commonM %}
+{{ commonM.render_object(object, service, nls) }}
+</div>

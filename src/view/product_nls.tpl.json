@@ -1,0 +1,43 @@
+{
+{% for key, nl in nls %}
+	"{{ key }}" : {
+		"productNl" : {
+{% set tagnl = tagNls[key] %}
+{% for basenl in nl %}
+			"{{ basenl.id }}" : {
+				"name" : "{{ basenl.name }}",
+				"urlName" : "{{ basenl.urlName }}",
+				"details" : "{{ basenl.details | json }}",
+				"des" : "{{ basenl.des }}",
+				"keywords" : "{{ basenl.keywords }}",
+				"tags" : [
+{% for value in tagnl[basenl.id] %}
+					"{{ value }}"{% if loop.last == false %},{% endif %}
+
+{% endfor %}
+				]
+			}{% if loop.last == false %},{% endif %}
+
+{% endfor %}
+		},
+		"attributeNl" : {
+{% for attrnl in attrNls[key] %}
+			"{{ attrnl.id }}" : {
+				"name" : "{{ attrnl.name }}",
+				"value" : "{{ attrnl.value }}"
+			}{% if loop.last == false %},{% endif %}
+
+{% endfor %}
+		},
+		"styleNl" : {
+{% for key, stylenl in styleNls[key] %}
+			"{{ key }}" : {
+				"value" : "{{ stylenl.value }}"
+			}{% if loop.last == false %},{% endif %}
+
+{% endfor %}
+		}
+	}{% if loop.last == false %},{% endif %}
+
+{% endfor %}
+}

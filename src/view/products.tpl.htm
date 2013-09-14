@@ -1,0 +1,21 @@
+{% for p in products %}
+<div id="product-{{p.id}}" class="product">
+    product-{{p.id}}
+    <ul>
+        {% set pnl = service.nlize(p, nls) %}
+        <li>id : {{ attribute(pnl,'id') }}</li>
+        <li>name : {{ attribute(pnl,'name') }}</li>
+        <li>urlName : {{ attribute(pnl,'urlName') }}</li>
+        <li>desc : {{ attribute(pnl,'des') }}</li>
+        <li>keywords : {{ attribute(pnl,'keywords') }}</li>
+        <li>details : {{ attribute(pnl,'details') }}</li>
+        <li>thumb: {{ attribute(pnl,'thumb') }}</li>
+        <li>price : {{ attribute(pnl,'price') }}</li>
+        <li>marketPrice : {{ attribute(pnl,'marketPrice') }}</li>
+        <li>priceOff : {{ attribute(pnl,'priceOff') }}</li>
+        <li>colorNo : {{ attribute(pnl,'colorNo') }}</li>
+        <li>commentsNo : {{ attribute(pnl,'commentsNo') }}</li>
+        <li>rating : {{ attribute(pnl,'rating') }}</li>
+    </ul>
+</div>
+{% endfor %}
