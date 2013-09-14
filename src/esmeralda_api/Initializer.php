@@ -17,13 +17,17 @@ use \PDO;
 
 class Initializer{
 
+    public static function tplPath(){
+        return realpath(dirname(__DIR__).'/view');
+    }
+
     public function initConf($container){
         include_once $container['APP_FS_ROOT'].'etc/env_config.php';
         $container['siteConf'] = $siteConf;
         return $container;
     }
 
-    public function initDB($container){
+    public function initBase($container){
         $container['db'] = $container->share(function($c){
             $siteConf = $c['siteConf'];
             try {
@@ -39,10 +43,7 @@ class Initializer{
                 die;
             }
         });
-        return $container;
-    }
 
-    public function initWeb($container){
         $container['logger'] = $container->share(function($c){
             return new \Flynsarmy\SlimMonolog\Log\MonologWriter(array(
                 'handlers' => array(
@@ -50,11 +51,14 @@ class Initializer{
                 ),
             ));
         });
+        return $container;
+    }
 
+    public function initWeb($container){
         $container['tplengine'] = $container->share(function($c){
             $twig = new \Slim\Views\Twig();
             $twig->twigTemplateDirs = array(
-                realpath(dirname(__DIR__).'/view'),
+                Initializer::tplPath(),
             );
             $twig->twigOptions = array(
                 'debug' => true,

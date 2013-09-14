@@ -20,6 +20,6 @@ $container['PUBLIC_ROOT'] = $APP_WEB_ROOT.'public';
 use esmeralda_api\Initializer;
 $init = new Initializer();
 $container = $init->initConf($container);
-$container = $init->initDB($container);
+$container = $init->initBase($container);
 $container = $init->initWeb($container);
 $container = $init->initServices($container);
