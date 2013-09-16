@@ -5,16 +5,16 @@ use esmeralda_api\util\SlimWrapper;
 
 class Initializer{
 
-    public static function tplPath(){
-        return realpath(dirname(__DIR__).'/view');
+    protected function tplPath(){
+        return array(
+            realpath(dirname(__DIR__).'/view'),
+        );
     }
 
     public function initWeb($container){
         $container['tplengine'] = $container->share(function($c){
             $twig = new \Slim\Views\Twig();
-            $twig->twigTemplateDirs = array(
-                Initializer::tplPath(),
-            );
+            $twig->twigTemplateDirs = $this->tplPath();
             $twig->twigOptions = array(
                 'debug' => true,
                 //     		'cache' => $c['APP_FS_ROOT'] . 'var/tpl/'
