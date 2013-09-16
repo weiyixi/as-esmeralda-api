@@ -15,6 +15,7 @@
         location ~* .*\.php$ {
             fastcgi_pass   127.0.0.1:9000;
             fastcgi_index  index.php;
+            fastcgi_param  APP_FS_ROOT /Users/blu3gui7ar/work/projects/git-ws/esmeralda-api/;
             fastcgi_param  SCRIPT_FILENAME  /Users/blu3gui7ar/work/projects/git-ws/esmeralda-api/src/api$fastcgi_script_name;
             include        fastcgi_params;
         }

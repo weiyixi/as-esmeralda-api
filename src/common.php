@@ -3,6 +3,13 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL );
 date_default_timezone_set('UTC');
 
+if(isset($_SERVER['APP_FS_ROOT'])){ 
+    $APP_FS_ROOT = $_SERVER['APP_FS_ROOT'];
+}
+if(empty($APP_FS_ROOT)){
+    $APP_FS_ROOT = dirname(__DIR__) . '/';
+}
+
 $APP_FS_ROOT = dirname(__DIR__) . '/';
 $APP_WEB_ROOT = dirname($_SERVER['SCRIPT_NAME']);
 if ($APP_WEB_ROOT[strlen($APP_WEB_ROOT)-1] != '/'){
