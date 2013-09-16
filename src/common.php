@@ -10,7 +10,6 @@ if(empty($APP_FS_ROOT)){
     $APP_FS_ROOT = dirname(__DIR__) . '/';
 }
 
-$APP_FS_ROOT = dirname(__DIR__) . '/';
 $APP_WEB_ROOT = dirname($_SERVER['SCRIPT_NAME']);
 if ($APP_WEB_ROOT[strlen($APP_WEB_ROOT)-1] != '/'){
 	$APP_WEB_ROOT = $APP_WEB_ROOT . '/';
