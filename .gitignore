@@ -1,5 +1,6 @@
 /vendor
 /var/log/*
 /var/tpl
-/etc/*
+/etc/env_config.php
+/stages/dev/esmeralda-api
 /composer.lock

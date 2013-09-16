@@ -1,0 +1,25 @@
+server {
+    listen 8900;
+    server_name     api.esmeralda.com;
+
+    access_log      logs/access-esmeralda-dev.log main;
+
+    set fs_root     /var/www/http/esmeralda-api;
+
+    root            $fs_root/src/api;
+    index           index.php;
+
+    location /apis/ {
+        rewrite ^/apis/([^/]+)$ /$1.rest.php last;
+        rewrite ^/apis/([^/]+)/.*$ /$1.rest.php last;
+    }
+
+    location ~* .*\.php$ {
+        fastcgi_pass   127.0.0.1:9000;
+        fastcgi_index  index.php;
+        fastcgi_param  APP_FS_ROOT $fs_root;
+        fastcgi_param  SCRIPT_FILENAME  $fs_root/src/api$fastcgi_script_name;
+        include        fastcgi_params;
+    }
+}
+
