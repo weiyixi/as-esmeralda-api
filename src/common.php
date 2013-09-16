@@ -22,4 +22,4 @@ $container = $baseinit->initBase($container);
 $container = $baseinit->initServices($container);
 
 $apiinit = new esmeralda_api\Initializer();
-$container = $init->initWeb($container);
+$container = $apiinit->initWeb($container);
