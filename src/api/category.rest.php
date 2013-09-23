@@ -34,11 +34,11 @@ $container['slim']->get("$prefix/:id/topsales", function($lang, $id) use ($conta
 });
 
 $container['slim']->get("$prefix/:id/filter(/:params+)", function($lang, $id, $params = array()) use ($container){
-    $json = $container['APP_FS_ROOT'].'modules/lestore_attribute/def/DB/db.attribute.json';
-    $useFilter = file_exists($json . '.filter.' . $id);
-    if($useFilter){
+    //$json = $container['APP_FS_ROOT'].'modules/lestore_attribute/def/DB/db.attribute.json';
+    //$useFilter = file_exists($json . '.filter.' . $id);
+    //if($useFilter){
         $category = $container['category']->getCategory($id);
-        $attributeS = new JsonAttributeService($json, $id, 'filter');
+        $attributeS = new JsonAttributeService($container['attribute_feeder'],$category->id);
         $anl = $attributeS->getNl('en');
         $baseurl = $container['slim']->urlFor('category', array('lang' => $lang, 'id' => $id));
         $attributeSel = new CategoryResource($attributeS, $anl, 
@@ -54,9 +54,9 @@ $container['slim']->get("$prefix/:id/filter(/:params+)", function($lang, $id, $p
             'APP_WEB_ROOT' => $container['APP_WEB_ROOT'],
             'PUBLIC_ROOT' => $container['PUBLIC_ROOT'],
         ));
-    }else{
-        echo 'to be implement';
-    }
+    //}else{
+    //    echo 'to be implement';
+    //}
 });
 
 $container['slim']->run();
