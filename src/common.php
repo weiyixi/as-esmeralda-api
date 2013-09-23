@@ -16,7 +16,12 @@ if ($APP_WEB_ROOT[strlen($APP_WEB_ROOT)-1] != '/'){
 }
 $APP_WEB_ROOT = str_replace("\\", "", $APP_WEB_ROOT);
 
-require_once $APP_FS_ROOT.'vendor/autoload.php';
+$vendor_load = realpath('../../../autoload.php');
+if(file_exists($vendor_load)){
+    require_once $vendor_load;
+}else{
+    require_once $APP_FS_ROOT.'vendor/autoload.php';
+}
 $container = new Pimple();
 $container['APP_FS_ROOT'] = $APP_FS_ROOT;
 $container['APP_WEB_ROOT'] = $APP_WEB_ROOT;
