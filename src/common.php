@@ -16,8 +16,8 @@ if ($APP_WEB_ROOT[strlen($APP_WEB_ROOT)-1] != '/'){
 }
 $APP_WEB_ROOT = str_replace("\\", "", $APP_WEB_ROOT);
 
-$vendor_load = realpath('../../../autoload.php');
-if(file_exists($vendor_load)){
+$vendor_load = realpath(__DIR__.'/../../../autoload.php');
+if($vendor_load && file_exists($vendor_load)){
     require_once $vendor_load;
 }else{
     require_once $APP_FS_ROOT.'vendor/autoload.php';
