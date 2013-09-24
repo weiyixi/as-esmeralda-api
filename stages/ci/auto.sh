@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 project=esmeralda-api
 repo=ec2-user@ec2-23-23-245-121.compute-1.amazonaws.com:38022
