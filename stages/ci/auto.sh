@@ -12,4 +12,6 @@ if [ -z "$(git remote | grep deployer)" ]; then
     git remote add deployer ssh://$repo/~/git_repo/$project.git
 fi
 
+git checkout master
+git merge origin/master
 git push deployer master
