@@ -15,7 +15,7 @@ class Initializer{
         $container['tplengine'] = $container->share(function($c){
             $twig = new \Slim\Views\Twig();
             $twig->twigTemplateDirs = $this->tplPath();
-            $twig->twigOptions = array(
+            $twig->parserOptions = array(
                 'debug' => false,
                 'cache' => $c['APP_FS_ROOT'] . 'var/tpl/'
             );
