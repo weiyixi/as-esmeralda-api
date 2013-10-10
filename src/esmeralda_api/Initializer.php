@@ -16,8 +16,8 @@ class Initializer{
             $twig = new \Slim\Views\Twig();
             $twig->twigTemplateDirs = $this->tplPath();
             $twig->twigOptions = array(
-                'debug' => true,
-                //     		'cache' => $c['APP_FS_ROOT'] . 'var/tpl/'
+                'debug' => false,
+                'cache' => $c['APP_FS_ROOT'] . 'var/tpl/'
             );
             return $twig;
         });
