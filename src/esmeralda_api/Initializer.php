@@ -22,6 +22,14 @@ class Initializer{
             return $twig;
         });
 
+        $container['slim_logger'] = $container->share(function($c){
+            return new \Flynsarmy\SlimMonolog\Log\MonologWriter(array(
+                'handlers' => array(
+                    new \Monolog\Handler\StreamHandler($c['APP_FS_ROOT'].'var/log/'.date('Y-m-d').'.log'),
+                ),
+            ));
+        });
+
         $container['slim'] = $container->share(function($c){
             \Slim\Route::setDefaultConditions(array(
                 'lang' => '[a-z]{2}'
@@ -29,7 +37,7 @@ class Initializer{
             return new SlimWrapper(array(
                 //return new \Slim\Slim(array(
                 'mode' => 'development',
-                'log.writer' => $c['logger'],
+                'log.writer' => $c['slim_logger'],
                 'log.enabled' => true,
                 'log.level' => \Slim\Log::DEBUG,
                 'debug' => true,
