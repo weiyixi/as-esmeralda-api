@@ -8,15 +8,6 @@
             "email": "blu3gui7ar@gmail.com"
         }
     ],
-    "repositories-local": [
-        {
-            "packagist" : false
-        },
-        {
-            "type": "vcs",
-            "url":  "file:///Users/blu3gui7ar/work/projects/git-ws/esmeralda"
-        }
-    ],
     "repositories": [
         {
             "type": "vcs",
@@ -24,7 +15,7 @@
         }
     ],
     "require": {
-        "blu3gui7ar/esmeralda": "*",
+        "blu3gui7ar/esmeralda": "~0.0.1@alpha",
         "slim/slim": "2.*",
         "slim/views": "0.1.*",
         "twig/twig": "1.*",
