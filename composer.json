@@ -20,7 +20,7 @@
         "slim/views": "0.1.*",
         "twig/twig": "1.*",
         "monolog/monolog": "1.7.*",
-        "flynsarmy/slim-monolog": "*",
+        "flynsarmy/slim-monolog": "@dev",
         "pimple/pimple": "1.1.*",
         "doctrine/cache": "1.3.*"
     },
