@@ -11,7 +11,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url":  "https://g.pupugao.com/hwang/esmeralda.git"
+            "url":  "https://g.pupugao.com/v5/esmeralda.git"
         }
     ],
     "require": {
