@@ -1,6 +1,10 @@
 <?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL );
+date_default_timezone_set('UTC');
+
 if(isset($_SERVER['APP_FS_ROOT'])){ 
-    $APP_FS_ROOT = $_SERVER['APP_FS_ROOT'].'/';
+    $APP_FS_ROOT = $_SERVER['APP_FS_ROOT'];
 }
 if(empty($APP_FS_ROOT)){
     $APP_FS_ROOT = dirname(__DIR__) . '/';
@@ -16,8 +20,9 @@ $vendor_load = realpath(__DIR__.'/../../../autoload.php');
 if($vendor_load && file_exists($vendor_load)){
     require_once $vendor_load;
 }else{
-    require_once $APP_FS_ROOT.'vendor/autoload.php';
+    require_once $APP_FS_ROOT.'/vendor/autoload.php';
 }
+
 $container = new Pimple();
 $container['APP_FS_ROOT'] = $APP_FS_ROOT;
 $container['APP_WEB_ROOT'] = $APP_WEB_ROOT;

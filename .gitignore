@@ -4,3 +4,4 @@
 /etc/env_config.php
 /stages/dev/esmeralda-api
 /composer.lock
+var/applogs
