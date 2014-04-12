@@ -6,12 +6,12 @@ $prefix = '/apis/products/:domain';
 function parseIds($param_ids){
     $ids = array();
     if (strstr($param_ids, ':')){
-		$ids = explode(":", $ids);
+		$ids = explode(":", $param_ids);
 		$start = $ids[0];
 		$len = $ids[1];
         $ids = range($start, $start + $len);
 	} else if (strstr($param_ids, '-')) {
-		$ids = explode("-", $ids);
+		$ids = explode("-", $param_ids);
 		$start = $ids[0];
 		$end = $ids[1];
         $ids = range($start, $end);
