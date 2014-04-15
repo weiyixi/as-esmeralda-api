@@ -9,26 +9,25 @@ $prefix = '/apis/category/:lang';
 
 $container['slim']->get("$prefix/:id", function($lang, $id) use ($container){
     $slim = $container['slim'];
-    function recurse(&$category, &$categoryS, &$cnl, &$slim, $lang){
-        $category = $categoryS->nlize($category, $cnl);
-        $category->apiurl = $slim->urlFor('category', array('lang'=>$lang, 'id'=>$category->id));
-        $category->children = $categoryS->getChildren($category->id());
-        foreach($category->children AS $child){
-            recurse($child, $categoryS, $cnl, $slim, $lang);
+
+    $category = null;
+    $catTree = $container['category']->getTree($lang, -1);
+    if (is_string($id)) {
+        if ($id == 'all') {
+            $category = $catTree->getAllNodes();
         }
-    };
-    $category = $container['category']->getCategory($id);
-    $categoryS = $container['category'];
-    $cnl = $container['category']->getNl($lang);
-    recurse($category, $categoryS, $cnl, $slim, $lang);
+    } else {
+        $id = (int) $id;
+        if ($id > 0) {
+            $category = $catTree->getTreeNode($id);
+        }        
+    }
 
-    $slim->render("category.tpl", array(
-        'category' => $category,
-        'APP_WEB_ROOT' => $container['APP_WEB_ROOT'],
-        'PUBLIC_ROOT' => $container['PUBLIC_ROOT'],
+    $slim->render("json.tpl", array(
+        'value' => $category,
+        'json_format' => JSON_FORCE_OBJECT | JSON_PRETTY_PRINT,
     ));
-
-})->name('category');
+});
 
 $container['slim']->get("$prefix/:id/topsales", function($lang, $id) use ($container){
     //get top sales
