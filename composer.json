@@ -8,21 +8,34 @@
             "email": "blu3gui7ar@gmail.com"
         }
     ],
+    "urepo":[
+        {
+            "packagist" : false
+        },
+        {
+            "type": "vcs",
+            "url":  "https://g.pupugao.com/v5/esmeralda.git"
+        }
+    ],
     "repositories": [
         {
             "type": "vcs",
-            "url":  "https://g.pupugao.com/hwang/esmeralda.git"
+            "url":  "file:///Users/blu3gui7ar/work/projects/git-ws/esmeralda"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/blu3gui7ar/Slim-Monolog.git"
         }
     ],
     "require": {
-        "blu3gui7ar/esmeralda": "~0.0.1@alpha",
+        "blu3gui7ar/esmeralda": "v0.1.20140417",
         "slim/slim": "2.*",
         "slim/views": "0.1.*",
         "twig/twig": "1.*",
         "monolog/monolog": "1.7.*",
-        "flynsarmy/slim-monolog": "@dev",
+        "flynsarmy/slim-monolog": "0.1.*",
         "pimple/pimple": "1.1.*",
-        "doctrine/cache": "1.3.*"
+        "facebook/xhprof": "dev-master"
     },
     "require-dev": {
         "phpunit/phpunit": "3.7.*",
