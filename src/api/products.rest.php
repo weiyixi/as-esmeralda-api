@@ -114,7 +114,8 @@ $container['slim']->get("$prefix/styles/:ids", function($ids) use ($container){
     ));
 });
 
-$container['slim']->get("$prefix/ids/:min/:limit", function($min, $limit) use ($container){
+$container['slim']->get("$prefix/ids/:range", function($range) use ($container){
+    list($min, $limit) = explode(':', $range);
     $slim = $container['slim'];
     $status = $slim->request->params('status');
     if(null == $status){
