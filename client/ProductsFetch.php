@@ -49,7 +49,7 @@ function curlFetch($url) {
 	do {
 		$data = curl_exec($ch);
 		$retry++;
-	} while (curl_errno($ch) === CURLE_OPERATION_TIMEOUTED && $retry < 3);
+	} while (curl_errno($ch) > 0 && $retry < 3);
 
 	if (empty($data)) {
 		ob_start();
