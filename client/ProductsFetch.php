@@ -29,7 +29,7 @@ $interval = 1; // sec
 
 // ----------------- util --------------------
 function curlFetch($url) {
-	global $authName, $authPwd, $http_proxy_host;
+	global $authName, $authPwd, $http_proxy_host, $http_proxy_port;
 
 	$ch = curl_init();
     if(!empty($http_proxy_host)){
