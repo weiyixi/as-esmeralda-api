@@ -146,7 +146,6 @@ do{
 	if ($productsStyles === false) {
 		echo "json decode failed.\n";
 	} elseif (empty($productsStyles)) {
-		var_dump($productsStyles);die;
 		echo "api return empty.\n";
 	} else {
 		echo "fetch successed.\n";
