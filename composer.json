@@ -28,7 +28,7 @@
         }
     ],
     "require": {
-        "blu3gui7ar/esmeralda": "dev-develop",
+        "blu3gui7ar/esmeralda": "@dev",
         "slim/slim": "2.*",
         "slim/views": "0.1.*",
         "twig/twig": "1.*",
