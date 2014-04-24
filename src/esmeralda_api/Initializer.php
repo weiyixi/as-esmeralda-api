@@ -23,9 +23,9 @@ class SlimWrapper extends \Slim\Slim{
             $resp['Content-Type'] = 'application/json';
             return;
         }
-        parent::render($tpl.".htm", $params);
+        parent::render($tpl.".json", $params);
         $resp = $this->response();
-        $resp['Content-Type'] = 'text/html';
+        $resp['Content-Type'] = 'application/json';
         return;
     }
 }

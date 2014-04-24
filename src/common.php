@@ -35,3 +35,6 @@ $container = $baseinit->initServices($container);
 
 $apiinit = new esmeralda_api\Initializer();
 $container = $apiinit->initWeb($container);
+
+//php compatability
+defined('JSON_PRETTY_PRINT') || define('JSON_PRETTY_PRINT', 0);
