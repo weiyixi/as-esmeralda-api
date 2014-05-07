@@ -8,7 +8,7 @@ if (isset($_SERVER['HTTP_HOST'])) {
 }
 
 $projectCode = isset($argv[1]) ? $argv[1] : 'JS';
-$projectCodeMap = include_once('./etc/projects.config.php');
+$projectCodeMap = include_once(__DIR__ . '/etc/projects.config.php');
 if (!isset($projectCodeMap[$projectCode]) || empty($projectCodeMap[$projectCode])) {
 	echo "Code: ".$projectCode.". No matched project.\n";
 	die;
@@ -16,9 +16,9 @@ if (!isset($projectCodeMap[$projectCode]) || empty($projectCodeMap[$projectCode]
 $projectName = $projectCodeMap[$projectCode];
 $specifiedMinPId = isset($argv[2]) ? $argv[2] : 0;
 
-require_once './etc/auth.config.php';
+require_once __DIR__.'/etc/auth.config.php';
 // Convert Plural to Singular or Vice Versa in English
-require_once './lib/Inflector.php';
+require_once __DIR__.'/lib/Inflector.php';
 $inflector = new Inflector();
 
 $categoryApi = 'https://api.opvalue.com/apis/category/en/all';
@@ -31,7 +31,7 @@ $projectNameLower = strtolower($projectName);
 $domainWhole = "http://www.{$projectNameLower}.com/";
 $defaultCdn = "http://d3bvl598xc7qos.cloudfront.net/upimg/{$projectNameLower}/o400/";
 
-$autoPinConf = include_once('etc/autopin.config.php');
+$autoPinConf = include_once(__DIR__ . '/etc/autopin.config.php');
 
 function curlFetch($url) {
 	global $authName, $authPwd, $http_proxy_host, $http_proxy_port;
