@@ -1,37 +1,52 @@
 <?php
 /**
- * run in cli: php AutoPin.php projectName[JS(default)] minProductId[0(default)] 
+ * run in cli: php AutoPin.php robotNumber projectName[JS(default)] minProductId[0(default)] 
  */
 
 if (isset($_SERVER['HTTP_HOST'])) {
     die('Only runs in CLI mode.');
 }
+date_default_timezone_set('PRC');
 
-$projectCode = isset($argv[1]) ? $argv[1] : 'JS';
+$robotNumber = isset($argv[1]) ? intval($argv[1]) : null;
+if (is_null($robotNumber)) {
+	echo "please specify robot.\n";
+	die;
+}
+$robotInfoPath = './etc/robots/robot'.$robotNumber.'.php';
+if (!file_exists($robotInfoPath)) {
+	echo "robot{$robotNumber} not exists.\n";
+	die;
+}
+$robot = include_once($robotInfoPath);
+if (!isset($robot['active']) || !$robot['active']) {
+	echo "robot{$robotNumber} is inactive.\n";
+	die;
+}
+
+$projectCode = isset($argv[2]) ? $argv[2] : 'JS';
 $projectCodeMap = include_once('./etc/projects.config.php');
 if (!isset($projectCodeMap[$projectCode]) || empty($projectCodeMap[$projectCode])) {
 	echo "Code: ".$projectCode.". No matched project.\n";
 	die;
 }
 $projectName = $projectCodeMap[$projectCode];
-$specifiedMinPId = isset($argv[2]) ? $argv[2] : 0;
+$specifiedMinPId = isset($argv[3]) ? $argv[3] : 0;
 
 require_once './etc/auth.config.php';
 // Convert Plural to Singular or Vice Versa in English
 require_once './lib/Inflector.php';
 $inflector = new Inflector();
 
-$categoryApi = 'https://api.opvalue.com/apis/category/en/all';
-$productIdsApiRaw = 'https://api.opvalue.com/apis/products/ids/#MIN#:#LIMIT#';
-$productsApiRaw = 'https://api.opvalue.com/apis/products/base/#IDS#/jjshouse?lang=en';
-$apiFetchInterval = 1; // sec
-$pinInterval = mt_rand(20, 40); // sec
-
 $projectNameLower = strtolower($projectName);
 $domainWhole = "http://www.{$projectNameLower}.com/";
 $defaultCdn = "http://d3bvl598xc7qos.cloudfront.net/upimg/{$projectNameLower}/o400/";
-
 $autoPinConf = include_once('etc/autopin.config.php');
+
+$categoryApi = 'https://api.opvalue.com/apis/category/en/all';
+$productIdsApiRaw = 'https://api.opvalue.com/apis/products/ids/#MIN#:#LIMIT#';
+$productsApiRaw = "https://api.opvalue.com/apis/products/base/#IDS#/{$projectNameLower}?lang=en";
+$apiFetchInterval = 1; // sec
 
 function curlFetch($url) {
 	global $authName, $authPwd, $http_proxy_host, $http_proxy_port;
@@ -68,7 +83,7 @@ function curlFetch($url) {
 }
 
 function initPin() {
-	global $autoPinConf;
+	global $autoPinConf, $robotNumber;
 
 	$csrftoken = '';
 	$sessId = '';
@@ -95,7 +110,7 @@ function initPin() {
 		$dataDump = print_r($headers, true);
 		$contextDump = print_r($context, true);
 		$msg = "header:\n".$dataDump."context:\n".$contextDump."\n\n";
-		file_put_contents('./log/error_log.initpin', $msg, FILE_APPEND);
+		file_put_contents('./log/error_log.initpin.robot'.$robotNumber, $msg, FILE_APPEND);
 		return false;
 	}
 
@@ -120,7 +135,7 @@ function initPin() {
 }
 
 function loginPin($username, $password, $csrftoken, $sessId) {
-	global $autoPinConf;
+	global $autoPinConf, $robotNumber;
 
 	$try = isset($autoPinConf['try']['login']) ? (int) $autoPinConf['try']['login'] : 0;
 	$timeout = isset($autoPinConf['timeout']['login']) ? (int) $autoPinConf['timeout']['login'] : 60;
@@ -169,7 +184,7 @@ function loginPin($username, $password, $csrftoken, $sessId) {
 	if ($httpCode != 200) {
 		$dataDump = print_r($data, true);
 		$msg = "account:{$username}\nhttpCode:{$httpCode}\ncurlErrNo:".curl_errno($ch)."\ncurlErr:".curl_error($ch)."\ndata:".$dataDump."\n\n";
-		file_put_contents('./log/error_log.loginpin', $msg, FILE_APPEND);
+		file_put_contents('./log/error_log.loginpin.robot'.$robotNumber, $msg, FILE_APPEND);
 		curl_close($ch);
 		return false;
 	}
@@ -187,7 +202,7 @@ function loginPin($username, $password, $csrftoken, $sessId) {
 }
 
 function pinIt($loginedCookie, $csrftoken, $pinParam){
-	global $autoPinConf;
+	global $autoPinConf, $robotNumber;
 
 	$try = isset($autoPinConf['try']['pinit']) ? (int) $autoPinConf['try']['pinit'] : 0;
 	$timeout = isset($autoPinConf['timeout']['pinit']) ? (int) $autoPinConf['timeout']['pinit'] : 60;
@@ -230,7 +245,7 @@ function pinIt($loginedCookie, $csrftoken, $pinParam){
 	if ($httpCode != 200) {
 		$dataDump = print_r($data, true);
 		$msg = "httpCode:{$httpCode}\ncurlErrNo:".curl_errno($ch)."\ncurlErr:".curl_error($ch)."\ndata:".$dataDump."\n\n";
-		file_put_contents('./log/error_log.pinit', $msg, FILE_APPEND);
+		file_put_contents('./log/error_log.pinit.robot'.$robotNumber, $msg, FILE_APPEND);
 		curl_close($ch);
 		return false;
 	}
@@ -269,7 +284,7 @@ if ($jsonDecodeResult === false) {
 	echo "fetch successed.\n";
 }
 
-$accountLoginInfo = array();
+$robotLoginInfo = array();
 $productPinedCount = 0;
 $minProductId = $specifiedMinPId;
 $limit = 50;
@@ -308,6 +323,7 @@ do{
 		echo "fetch successed.\n";
 	}
 
+	ksort($products);
 	foreach ($products as $pid => $prod) {
 		$catParentId = $prod['cat_id'] == 2 ? 2 : $categorys[$prod['cat_id']]['parent_id'];
 		// version-1 just pin dress
@@ -343,54 +359,58 @@ do{
 			$pinParam->options->is_video = null;
 			$pinParam->context = new stdclass();
 
-			foreach ($autoPinConf['accounts'] as $accountId => $account) {
-				$username = $account['username'];
-				$password = $account['password'];
-				$boardId = $account['boards'][$catParentId];
+			$username = $robot['username'];
+			$password = $robot['password'];
+			$boardId = isset($robot['boards'][$catParentId]) ? $robot['boards'][$catParentId] : null;
+			if (is_null($boardId)) {
+				echo "no matched border for category: {$catParentId}, product: {$productId}.\n";
+				continue;
+			}
 
-				$pinParam->options->board_id = $boardId;
+			$pinParam->options->board_id = $boardId;
 
-				echo $username." pin ".$productId." on ".$boardId."\n";
-				if (!isset($accountLoginInfo[$accountId])) {
-					echo "initing pin\n";
-					$initResult = initPin();
-					if ($initResult !== false) {
-						list($csrftoken, $sessId) = $initResult;
-						echo "success\n";
-					} else {
-						echo "error\n";
-						continue;
-					}
-
-					echo "logining pin\n";
-					$loginResult = loginPin($username, $password, $csrftoken, $sessId);
-					if ($loginResult !== false) {
-						$loginedCookie = $loginResult;	
-						echo "success\n";
-					} else {
-						echo "error\n";
-						continue;
-					}
-
-					$accountLoginInfo[$accountId]['csrftoken'] = $csrftoken;
-					$accountLoginInfo[$accountId]['sessId'] = $sessId;
-					$accountLoginInfo[$accountId]['loginedCookie'] = $loginedCookie;
-				} else {
-					$csrftoken = $accountLoginInfo[$accountId]['csrftoken'];
-					$sessId = $accountLoginInfo[$accountId]['sessId'];
-					$loginedCookie = $accountLoginInfo[$accountId]['loginedCookie'];
-				}
-
-				echo "pining it\n";
-				$result = pinIt($loginedCookie, $csrftoken, $pinParam);
-				if ($result !== false) {
+			echo $username." pin ".$productId." on ".$boardId."\n";
+			if (empty($robotLoginInfo)) {
+				echo "initing pin\n";
+				$initResult = initPin();
+				if ($initResult !== false) {
+					list($csrftoken, $sessId) = $initResult;
 					echo "success\n";
 				} else {
 					echo "error\n";
+					continue;
 				}
+
+				echo "logining pin\n";
+				$loginResult = loginPin($username, $password, $csrftoken, $sessId);
+				if ($loginResult !== false) {
+					$loginedCookie = $loginResult;	
+					echo "success\n";
+				} else {
+					echo "error\n";
+					continue;
+				}
+
+				$robotLoginInfo['csrftoken'] = $csrftoken;
+				$robotLoginInfo['sessId'] = $sessId;
+				$robotLoginInfo['loginedCookie'] = $loginedCookie;
+			} else {
+				$csrftoken = $robotLoginInfo['csrftoken'];
+				$sessId = $robotLoginInfo['sessId'];
+				$loginedCookie = $robotLoginInfo['loginedCookie'];
 			}
 
+			echo "pining it\n";
+			$result = pinIt($loginedCookie, $csrftoken, $pinParam);
+			if ($result !== false) {
+				echo "success\n";
+			} else {
+				echo "error\n";
+			}
+			echo "end time: ".date('Y-m-d H:i:s')."\n";
+
 			// stop some seconds every product
+			$pinInterval = mt_rand($robot['pinInterval']['min'], $robot['pinInterval']['max']); // sec
 			sleep($pinInterval);
 		}
 	}
