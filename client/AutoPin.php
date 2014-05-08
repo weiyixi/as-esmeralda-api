@@ -287,6 +287,7 @@ if ($jsonDecodeResult === false) {
 $robotLoginInfo = array();
 $productPinedCount = 0;
 $minProductId = $specifiedMinPId;
+$launchTime = time();
 $limit = 50;
 do{
 	$productIdsApi = str_replace('#MIN#', $minProductId, $productIdsApiRaw);
@@ -362,6 +363,7 @@ do{
 			$username = $robot['username'];
 			$password = $robot['password'];
 			$boardId = isset($robot['boards'][$catParentId]) ? $robot['boards'][$catParentId] : null;
+			$boardId = is_null($boardId) && isset($robot['defaultBorder']) ? $robot['defaultBorder'] : $boardId;
 			if (is_null($boardId)) {
 				echo "no matched border for category: {$catParentId}, product: {$productId}.\n";
 				continue;
@@ -409,8 +411,15 @@ do{
 			}
 			echo "end time: ".date('Y-m-d H:i:s')."\n";
 
-			// stop some seconds every product
-			$pinInterval = mt_rand($robot['pinInterval']['min'], $robot['pinInterval']['max']); // sec
+			// rest for an hour every three hours
+			$currentTime = time();
+			if (($currentTime - $launchTime) >= 10800) {
+				$pinInterval = 3600;
+				$launchTime = $currentTime + $pinInterval;
+			} else {
+				// pause for a moment every product
+				$pinInterval = mt_rand($robot['pinInterval']['min'], $robot['pinInterval']['max']); // sec
+			}
 			sleep($pinInterval);
 		}
 	}

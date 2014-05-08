@@ -9,9 +9,9 @@
 
 		'proxy' => array(
 			'host' => '192.168.1.49',
-			'port' => 3446,
-			'user' => 'nwu',
-			'pass' => 'vv8dpk89',
+			'port' => 3448,
+			'user' => '',
+			'pass' => '',
 		),
 
 		// try count of init pin, login ping and pin it
