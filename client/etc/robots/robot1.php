@@ -1,6 +1,6 @@
 <?php
 	return array(
-		'active' => true,
+		'active' => false,
 		'username' => "ALVINAJULIANA@yahoo.com",
 		'password' => "Abc2014123",
 		'boards' => array(
@@ -11,5 +11,11 @@
 		'pinInterval' => array(
 			'min' => 15,
 			'max' => 20,
+		),
+		'proxy' => array(
+			'host' => '192.168.1.123',
+			'port' => 29088,
+			'user' => '',
+			'pass' => '',
 		),
 	);

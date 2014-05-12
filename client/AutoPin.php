@@ -83,17 +83,17 @@ function curlFetch($url) {
 }
 
 function initPin() {
-	global $autoPinConf, $robotNumber;
+	global $autoPinConf, $robotNumber, $robot;
 
 	$csrftoken = '';
 	$sessId = '';
 	$try = isset($autoPinConf['try']['initp']) ? (int) $autoPinConf['try']['initp'] : 0;
 	$timeout = isset($autoPinConf['timeout']['initp']) ? (int) $autoPinConf['timeout']['initp'] : 60;
 
-	$auth = base64_encode("{$autoPinConf['proxy']['user']}:{$autoPinConf['proxy']['pass']}");
+	$auth = base64_encode("{$robot['proxy']['user']}:{$robot['proxy']['pass']}");
 	$context = array(
         'http' => array(
-            'proxy' => "{$autoPinConf['proxy']['host']}:{$autoPinConf['proxy']['port']}",
+            'proxy' => "{$robot['proxy']['host']}:{$robot['proxy']['port']}",
             'request_fulluri' => true,
             'header' => "Proxy-Authorization: Basic $auth",
             'timeout' => $timeout
@@ -135,7 +135,7 @@ function initPin() {
 }
 
 function loginPin($username, $password, $csrftoken, $sessId) {
-	global $autoPinConf, $robotNumber;
+	global $autoPinConf, $robotNumber, $robot;
 
 	$try = isset($autoPinConf['try']['login']) ? (int) $autoPinConf['try']['login'] : 0;
 	$timeout = isset($autoPinConf['timeout']['login']) ? (int) $autoPinConf['timeout']['login'] : 60;
@@ -172,8 +172,8 @@ function loginPin($username, $password, $csrftoken, $sessId) {
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $postfields);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, false);
-	curl_setopt($ch, CURLOPT_PROXY, "{$autoPinConf['proxy']['host']}:{$autoPinConf['proxy']['port']}");
-	curl_setopt($ch, CURLOPT_PROXYUSERPWD, "{$autoPinConf['proxy']['user']}:{$autoPinConf['proxy']['pass']}");
+	curl_setopt($ch, CURLOPT_PROXY, "{$robot['proxy']['host']}:{$robot['proxy']['port']}");
+	curl_setopt($ch, CURLOPT_PROXYUSERPWD, "{$robot['proxy']['user']}:{$robot['proxy']['pass']}");
 	curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
 	do {
 		$data = curl_exec($ch);
@@ -202,7 +202,7 @@ function loginPin($username, $password, $csrftoken, $sessId) {
 }
 
 function pinIt($loginedCookie, $csrftoken, $pinParam){
-	global $autoPinConf, $robotNumber;
+	global $autoPinConf, $robotNumber, $robot;
 
 	$try = isset($autoPinConf['try']['pinit']) ? (int) $autoPinConf['try']['pinit'] : 0;
 	$timeout = isset($autoPinConf['timeout']['pinit']) ? (int) $autoPinConf['timeout']['pinit'] : 60;
@@ -233,8 +233,8 @@ function pinIt($loginedCookie, $csrftoken, $pinParam){
 	curl_setopt($ch, CURLOPT_COOKIE, $loginedCookie);
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $postfields);
     curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, false);
-	curl_setopt($ch, CURLOPT_PROXY, "{$autoPinConf['proxy']['host']}:{$autoPinConf['proxy']['port']}");
-	curl_setopt($ch, CURLOPT_PROXYUSERPWD, "{$autoPinConf['proxy']['user']}:{$autoPinConf['proxy']['pass']}");
+	curl_setopt($ch, CURLOPT_PROXY, "{$robot['proxy']['host']}:{$robot['proxy']['port']}");
+	curl_setopt($ch, CURLOPT_PROXYUSERPWD, "{$robot['proxy']['user']}:{$robot['proxy']['pass']}");
 	curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
 	do {
 		$data = curl_exec($ch);
@@ -284,10 +284,21 @@ if ($jsonDecodeResult === false) {
 	echo "fetch successed.\n";
 }
 
+// $workTime = 28800;
+// $stopTime = time() + $workTime;
+// $minRestTime = 60;
+// $defaultWorkLoad = $workLoad = 30;
+// $unitWorkLoadTime = 120;
+
+$workTime = 360;
+$stopTime = time() + $workTime;
+$minRestTime = 30;
+$defaultWorkLoad = $workLoad = 3;
+$unitWorkLoadTime = 30;
+
 $robotLoginInfo = array();
 $productPinedCount = 0;
 $minProductId = $specifiedMinPId;
-$launchTime = time();
 $limit = 50;
 do{
 	$productIdsApi = str_replace('#MIN#', $minProductId, $productIdsApiRaw);
@@ -354,6 +365,11 @@ do{
 			$pinParam = new stdclass();
 			$pinParam->options = new stdclass();
 			$pinParam->options->description = $product['name'].' '.$productUrl.' '.$catNameSingular.' '.$catName.' '.'#'.$productTagSingular.' '.'#'.$productTag;
+			$pinParam->options->description = 'Only $'.$product['shop_price'].'! '.$pinParam->options->description;
+			if (isset($autoPinConf['advertorial']) && !empty($autoPinConf['advertorial'])) {
+				$advertorialNumber = mt_rand(0, count($autoPinConf['advertorial']) - 1);
+				$pinParam->options->description = $autoPinConf['advertorial'][$advertorialNumber].' '.$pinParam->options->description;
+			}
 			$pinParam->options->link = $productUrl;
 			$pinParam->options->image_url = $defaultCdn.$product['goods_thumb'];
 			$pinParam->options->method = "button";
@@ -411,15 +427,38 @@ do{
 			}
 			echo "end time: ".date('Y-m-d H:i:s')."\n";
 
-			// rest for an hour every three hours
-			$currentTime = time();
-			if (($currentTime - $launchTime) >= 10800) {
-				$pinInterval = 3600;
-				$launchTime = $currentTime + $pinInterval;
+			if (is_null($robot['pinInterval']['min']) || is_null($robot['pinInterval']['max'])) {
+				echo "workNumber: ".$workLoad."\n";
+				$workLoad--;
+				if ($workLoad > 0) {
+					$remainWorkTime = $stopTime - time();
+					if ($remainWorkTime > 0) {
+						$avgWorkTime = round($remainWorkTime / ($workLoad + 1));
+						$maxRestTime = $avgWorkTime - $unitWorkLoadTime;
+					} else {
+						$avgWorkTime = 0;
+						$maxRestTime = 0;
+					}
+					// working overtime? o(╯□╰)o
+					if ($maxRestTime > $minRestTime) {
+						$pinInterval = mt_rand($minRestTime, $maxRestTime);
+					} else {
+						$pinInterval = $minRestTime;
+					}
+					echo "remainWorkTime: ".$remainWorkTime."\n";
+					echo "avgWorkTime: ".$avgWorkTime."\n";
+					echo "unitWorkLoadTime: ".$unitWorkLoadTime."\n";
+					echo "minRestTime: ".$minRestTime."\n";
+					echo "maxRestTime: ".$maxRestTime."\n";
+				} else {
+					$workLoad = $defaultWorkLoad;
+					$pinInterval = ($stopTime - time()) + 57600;
+				}
+				echo "pinInterval: ".$pinInterval."\n";
 			} else {
-				// pause for a moment every product
 				$pinInterval = mt_rand($robot['pinInterval']['min'], $robot['pinInterval']['max']); // sec
 			}
+			// pause for a moment every product
 			sleep($pinInterval);
 		}
 	}

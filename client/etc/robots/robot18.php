@@ -1,17 +1,17 @@
 <?php
 	return array(
 		'active' => true,
-		'username' => "ADELEJOBETH@outlook.com",
-		'password' => "789456123",
+		'username' => "urtbernat@yahoo.com",
+		'password' => "abc2014123",
 		'boards' => array(),
-		'defaultBorder' => '486388897195092442',
+		'defaultBorder' => '296745131636287127',
 		'pinInterval' => array(
-			'min' => 180,
-			'max' => 240,
+			'min' => null,
+			'max' => null,
 		),
 		'proxy' => array(
 			'host' => '192.168.1.123',
-			'port' => 29089,
+			'port' => 50000,
 			'user' => '',
 			'pass' => '',
 		),
