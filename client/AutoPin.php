@@ -284,17 +284,17 @@ if ($jsonDecodeResult === false) {
 	echo "fetch successed.\n";
 }
 
-// $workTime = 28800;
-// $stopTime = time() + $workTime;
-// $minRestTime = 60;
-// $defaultWorkLoad = $workLoad = 30;
-// $unitWorkLoadTime = 120;
-
-$workTime = 360;
+$workTime = 28800;
 $stopTime = time() + $workTime;
-$minRestTime = 30;
-$defaultWorkLoad = $workLoad = 3;
+$minRestTime = 60;
+$defaultWorkLoad = $workLoad = 30;
 $unitWorkLoadTime = 30;
+
+// $workTime = 360;
+// $stopTime = time() + $workTime;
+// $minRestTime = 30;
+// $defaultWorkLoad = $workLoad = 3;
+// $unitWorkLoadTime = 30;
 
 $robotLoginInfo = array();
 $productPinedCount = 0;
