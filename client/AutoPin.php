@@ -33,6 +33,20 @@ if (!isset($projectCodeMap[$projectCode]) || empty($projectCodeMap[$projectCode]
 $projectName = $projectCodeMap[$projectCode];
 $specifiedMinPId = isset($argv[3]) ? $argv[3] : 0;
 
+if (!file_exists('log')) {
+	if (!@mkdir('log', 777)) {
+		echo "create dir log failed.";
+		die;
+	}
+}
+
+if (!file_exists('data')) {
+	if (!@mkdir('data', 777)) {
+		echo "create dir data failed.";
+		die;
+	}
+}
+
 require_once __DIR__.'/etc/auth.config.php';
 // Convert Plural to Singular or Vice Versa in English
 require_once __DIR__.'/lib/Inflector.php';
@@ -453,6 +467,9 @@ do{
 				} else {
 					$workLoad = $defaultWorkLoad;
 					$pinInterval = ($stopTime - time()) + 57600;
+
+					// record the last pined product.
+					file_put_contents('data/autoPin.lastPinedProduct', $productId);
 				}
 				echo "pinInterval: ".$pinInterval."\n";
 			} else {
