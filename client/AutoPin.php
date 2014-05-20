@@ -34,14 +34,14 @@ $projectName = $projectCodeMap[$projectCode];
 $specifiedMinPId = isset($argv[3]) ? $argv[3] : 0;
 
 if (!file_exists('log')) {
-	if (!@mkdir('log', 777)) {
+	if (!@mkdir('log', 0777)) {
 		echo "create dir log failed.";
 		die;
 	}
 }
 
 if (!file_exists('data')) {
-	if (!@mkdir('data', 777)) {
+	if (!@mkdir('data', 0777)) {
 		echo "create dir data failed.";
 		die;
 	}
