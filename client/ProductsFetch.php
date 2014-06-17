@@ -11,7 +11,7 @@ if (isset($_SERVER['HTTP_HOST']))
 include_once './etc/auth.config.php';
 include_once './etc/db.config.php';
 
-$db = new PDO("mysql:host={$db_host};dbname={$db_name}", $db_user, $db_pass, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''));
+$db = new PDO("mysql:host={$db_host};port={$db_port};dbname={$db_name}", $db_user, $db_pass, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''));
 
 // --------------- global init ---------------
 $productStatus = isset($argv[1]) ? $argv[1] : 'onsale';
