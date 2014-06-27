@@ -26,6 +26,17 @@ class DbOrderWService implements EditService
         return $this->editDao->update($table, $data, $query);
     }
 
+    public function beginTransaction() {
+        return $this->editDao->beginTransaction();
+    }
+
+    public function rollBack() {
+        return $this->editDao->rollBack();
+    }
+
+    public function commit() {
+        return $this->editDao->commit();
+    }
 }
 
 

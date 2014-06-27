@@ -77,4 +77,14 @@ EOSQL;
         return false;
     }
 
+    public function beginTransaction() {
+        return $this->db()->beginTransaction();
+    }
+    public function rollBack() {
+        return $this->db()->rollBack();
+    }
+    public function commit() {
+        return $this->db()->commit();
+    }
+
 } 
