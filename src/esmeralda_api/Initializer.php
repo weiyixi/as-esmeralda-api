@@ -1,5 +1,7 @@
 <?php namespace esmeralda_api;
 
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\SwiftMailerHandler
 use esmeralda_service\base\BaseEditDao;
 use esmeralda_service\order\OrderDao;
 use esmeralda_service\order\DbOrderWService;
@@ -79,6 +81,29 @@ class Initializer{
             ));
         });
 
+        return $container;
+    }
+
+    public function initBase($container){
+        $container['api_log_handlers'] = $container->share(function($c){
+            $siteConf = $c['siteConf'];
+            if(!isset($siteConf['api_log_dir'])){
+                $siteConf['api_log_dir'] = '/var/log/esmeralda-api';
+            }
+            Initializer::ensureDir($siteConf['api_log_dir']);
+            $transport = Swift_AWSTransport::newInstance(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY);
+            $message = Swift_Message::newInstance('esmeralda api occurs some problem.')->setFrom(array($siteConf['NOTICE_EMAIL']))->setTo(array($siteConf['ALARM_EMAIL']));
+            $handers = array(
+                new StreamHandler($siteConf['log_dir'].'/esmeralda-api-'.date('Y-m-d').'.log', $siteConf['log_level']),
+                new SwiftMailerHandler(Swift_Mailer::newInstance($transport), $message, Logger::CRITICAL),
+            );
+            return $handers;
+        });
+
+        return $container;
+    }
+
+    public function initServices($container){
         $container['order'] = $container->share(function($c){
             $siteConf = $c['siteConf'];
             $dao = new OrderDao($c);
@@ -91,5 +116,11 @@ class Initializer{
         });
 
         return $container;
+    }
+
+    public static function ensureDir($dir){
+        if(!is_dir($dir)){
+            @mkdir($dir, 0755, true);
+        }
     }
 }
