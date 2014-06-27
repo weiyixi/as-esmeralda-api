@@ -1,20 +1,17 @@
-<?php
-
-namespace esmeralda_service\base;
+<?php namespace esmeralda_service\base;
 
 use esmeralda\base\BaseDao;
 use esmeralda\base\LogFactory;
 
 class BaseEditDao extends BaseDao {
 
-    public function batchInsert($table, $data) {
+    public function insert($table, $data) {
         if (!is_array(reset($data))) {
             $data = array($data);
         }
 
         $firstArr = reset($data);
         $columns = implode(', ', array_keys($firstArr));
-//        $values = implode(', ', array_fill(0, count($firstArr), '?'));
         $values = substr(str_repeat('?,', count($firstArr)), 0, -1);
         $values = implode(', ', array_fill(0, count($data), "($values)"));
 
@@ -40,29 +37,8 @@ EOSQL;
         return false;
     }
 
-    public function insert($table, $data) {
-        $columns = implode(', ', array_keys($data));
-//        $values = implode(', ', array_fill(0, count($data), '?'));
-        $values = substr(str_repeat('?,', count($data)), 0, -1);
-
-        $sql = <<<EOSQL
-            /* BaseEditDao.INSERT */
-            INSERT INTO {$this->_T($table)}
-            ($columns)
-            VALUES
-            ($values)
-EOSQL;
-        try {
-            $pstmt = $this->db()->prepare($sql);
-            if ($pstmt->execute(array_values($data))) {
-                return $this->db()->lastInsertId();
-            }
-        } catch (\PDOException $e) {
-            $logger = LogFactory::get('base_edit_dao');
-            $logger->error('DB query error.', array($e));
-        }
-
-        return false;
+    public function getLastInsertId() {
+        return $this->db()->lastInsertId();
     }
 
     public function update($table, $data, $query = array()) {

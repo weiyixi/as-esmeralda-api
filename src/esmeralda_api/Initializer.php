@@ -1,5 +1,10 @@
 <?php namespace esmeralda_api;
 
+use esmeralda_service\base\BaseEditDao;
+use esmeralda_service\order\OrderDao;
+use esmeralda_service\order\DbOrderWService;
+use esmeralda_service\order\DBOrderService;
+
 class SlimWrapper extends \Slim\Slim{
     public function __construct($options){
         parent::__construct($options);
@@ -73,6 +78,18 @@ class Initializer{
                 'view' => $c['tplengine'],
             ));
         });
+
+        $container['order'] = $container->share(function($c){
+            $siteConf = $c['siteConf'];
+            $dao = new OrderDao($c);
+            return new DBOrderService($dao, $siteConf['domain']);
+        });
+        $container['orderW'] = $container->share(function ($c) {
+            $siteConf = $c['siteConf'];
+            $editDao = new BaseEditDao($c);
+            return new DbOrderWService($editDao, $siteConf['domain']);
+        });
+
         return $container;
     }
 }
