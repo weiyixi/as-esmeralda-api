@@ -177,5 +177,86 @@ EOSQL;
         return array();
     }
 
+    public function checkOrderSnExists($orderSn) {
+        $sql = <<<EOSQL
+            /* OrderDao.checkOrderSnExists */
+            SELECT 1
+            FROM {$this->_T('order_info')}
+            WHERE order_sn = :orderSn
+            LIMIT 1
+EOSQL;
+
+        try{
+            $pstmt = $this->db()->prepare($sql);
+            $pstmt->bindParam(':orderSn', $orderSn);
+            if ($pstmt->execute()) {
+                $rs = $pstmt->fetchColumn();
+                return $rs;
+            }
+        }catch(\PDOException $e){
+            $logger = LogFactory::get('order_dao');
+            $logger->error('DB query error.', array($e));
+        }
+        return false;
+    }
+
+    public function checkSkuIdExists($skuItems) {
+        $columns = array();
+        foreach ($skuItems as $k => $v) {
+            $columns[] = $k . ' = ?';
+        }
+        $columns = implode(', ', $columns);
+
+        $sql = <<<EOSQL
+            /* OrderDao.checkSkuIdExists */
+            SELECT 1
+            FROM {$this->_T('goods_sku')}
+            WHERE {$columns}
+            LIMIT 1
+EOSQL;
+
+        try{
+            $pstmt = $this->db()->prepare($sql);
+            $params = array_values($skuItems);
+            if ($pstmt->execute($params)) {
+                $rs = $pstmt->fetchColumn();
+                return $rs;
+            }
+        }catch(\PDOException $e){
+            $logger = LogFactory::get('order_dao');
+            $logger->error('DB query error.', array($e));
+        }
+        return false;
+    }
+
+    public function checkGStyleIdExists($styleItems) {
+        $columns = array();
+        foreach ($styleItems as $k => $v) {
+            $columns[] = $k . ' = ?';
+        }
+        $columns = implode(', ', $columns);
+
+        $sql = <<<EOSQL
+            /* OrderDao.checkGStyleIdExists */
+            SELECT 1
+            FROM {$this->_T('goods_style')}
+            WHERE {$columns}
+            LIMIT 1
+EOSQL;
+
+        try{
+            $pstmt = $this->db()->prepare($sql);
+            $params = array_values($styleItems);
+            if ($pstmt->execute($params)) {
+                $rs = $pstmt->fetchColumn();
+                return $rs;
+            }
+        }catch(\PDOException $e){
+            $logger = LogFactory::get('order_dao');
+            $logger->error('DB query error.', array($e));
+        }
+        return false;
+    }
+
 }
 

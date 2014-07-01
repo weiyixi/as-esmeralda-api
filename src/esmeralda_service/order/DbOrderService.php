@@ -38,6 +38,18 @@ class DbOrderService implements OrderService
         return $this->dao->getOrderCopyLog($orderSn);
     }
 
+    public function checkOrderSnExists($orderSn) {
+        return $this->dao->checkOrderSnExists($orderSn);
+    }
+
+    public function checkSkuIdExists($skuItems) {
+        return $this->dao->checkSkuIdExists($skuItems);
+    }
+
+    public function checkGStyleIdExists($styleItems) {
+        return $this->dao->checkGStyleIdExists($styleItems);
+    }
+
 }
 
 
