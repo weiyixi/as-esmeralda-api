@@ -10,6 +10,7 @@ $logger = ApiLogFactory::get('raworder.rest');
 
 $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($container) {
 
+	$slim = $container['slim'];
 	$response = array('code' => 0, 'msg' => '', 'data' => array());
 	$jsonTpl = 'json.tpl';
 	$jsonFormat = JSON_FORCE_OBJECT | JSON_PRETTY_PRINT;
@@ -180,6 +181,7 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 
 $container['slim']->post($prefix.'/pay/:orderSn', function ($orderSn) use ($container) {
 
+	$slim = $container['slim'];
 	$response = array('code' => 0, 'msg' => '', 'data' => array());
 	$jsonTpl = 'json.tpl';
 	$paid = 2;
