@@ -27,7 +27,21 @@ $container['slim']->post($prefix, function () use ($container) {
 		die;
 	}
 
+	$affectedRows = $container['orderW']->insert('order_copy_log', array(
+		'order_sn' => $_POST['order_sn'],
+		'data' => json_encode($_POST),
+	));
+	if (!$affectedRows) {
+		$response['msg'] = "save data failed.";
+		$logger->critical($response['msg']);
+	    $slim->render($jsonTpl, array('value' => $response, 'json_format' => $jsonFormat));
+		die;
+	}
 
+	// success return
+	$response['code'] = 1;
+	$response['msg'] = "success.";
+	$slim->render($jsonTpl, array('value' => $response, 'json_format' => $jsonFormat));
 });
 
 $container['slim']->run();
