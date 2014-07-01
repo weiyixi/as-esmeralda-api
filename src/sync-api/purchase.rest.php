@@ -8,19 +8,26 @@ $logger->error('hello world.');
 
 $prefix = '/sync-apis/purchase';
 
-$container['slim']->post($prefix, function () {
+$container['slim']->post($prefix, function () use ($container) {
+	$slim = $container['slim'];
+	$response = array('code' => 0, 'msg' => '');
+	$jsonTpl = 'json.tpl';
+	$jsonFormat = JSON_FORCE_OBJECT | JSON_PRETTY_PRINT;
 
-	if (isset($_POST['orderSn'])) {
-		
+	if (!isset($_POST['order_sn']) || empty($_POST['order_sn'])) {
+		$response['msg'] = "missing order sn.";
+		$logger->error($response['msg']);
+	    $slim->render($jsonTpl, array('value' => $response, 'json_format' => $jsonFormat));
+		die;
+	}
+	if (!isset($_POST['goods']) || !is_array($_POST['goods']) || empty($_POST['goods'])) {
+		$response['msg'] = "missing goods info.";
+		$logger->error($response['msg']);
+	    $slim->render($jsonTpl, array('value' => $response, 'json_format' => $jsonFormat));
+		die;
 	}
 
-	try {
-		// $result = $mailer->send($message);
-	} catch(\AWSConnectionError $e) {
-		echo "AWSConnectionError";
-	} catch(\Exception $e){
-		print_r($e);
-	}
+
 });
 
 $container['slim']->run();
