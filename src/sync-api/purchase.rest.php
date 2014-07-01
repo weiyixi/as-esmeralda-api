@@ -3,10 +3,9 @@ include_once dirname(__DIR__) . '/common.php';
 
 use esmeralda_service\base\ApiLogFactory;
 
-$logger = ApiLogFactory::get('purchase.rest');
-$logger->error('hello world.');
-
 $prefix = '/sync-apis/purchase';
+
+$logger = ApiLogFactory::get('purchase.rest');
 
 $container['slim']->post($prefix, function () use ($container, $logger) {
 	$slim = $container['slim'];
