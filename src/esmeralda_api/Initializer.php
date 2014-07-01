@@ -1,7 +1,7 @@
 <?php namespace esmeralda_api;
 
 use Monolog\Handler\StreamHandler;
-use Monolog\Handler\SwiftMailerHandler
+use Monolog\Handler\SwiftMailerHandler;
 use esmeralda_service\base\BaseEditDao;
 use esmeralda_service\order\OrderDao;
 use esmeralda_service\order\DbOrderWService;

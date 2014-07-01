@@ -9,6 +9,7 @@ $prefix = '/sync-apis/raworder';
 $logger = ApiLogFactory::get('raworder.rest');
 
 $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($container) {
+    $slim = $container['slim'];
 
 	$response = array('code' => 0, 'msg' => '', 'data' => array());
 	$jsonTpl = 'json.tpl';
@@ -150,7 +151,7 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 });
 
 $container['slim']->post($prefix.'/pay', function () use ($container) {
-
+    $slim = $container['slim'];
 	$response = array('code' => 0, 'msg' => '', 'data' => array());
 	$jsonTpl = 'json.tpl';
 	$paid = 2;
