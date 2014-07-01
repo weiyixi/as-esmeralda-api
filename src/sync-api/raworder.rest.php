@@ -12,6 +12,8 @@ $logger = ApiLogFactory::get('raworder.rest');
 $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($container, $logger) {
 
 	$slim = $container['slim'];
+	$orderService = $container['order'];
+	$orderWService = $container['orderW'];
 	$response = array('code' => 0, 'msg' => '', 'data' => array());
 	$jsonTpl = 'json.tpl';
 	$jsonFormat = JSON_FORCE_OBJECT | JSON_PRETTY_PRINT;
@@ -41,7 +43,7 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 	do {
 		$try++;
 		$orderSn = $proCode.Util::gen_order_sn();
-		if (!$container['order']->checkOrderSnExists($orderSn)) {
+		if (!$orderService->checkOrderSnExists($orderSn)) {
 			break;
 		}
 	} while ($try < 10);
@@ -50,13 +52,13 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 	// insert goods sku items
 	$skuIds = array();
 	if (isset($_POST['goods_sku']) && is_array($_POST['goods_sku'])) {
-		$container['orderW']->beginTransaction();
+		$orderWService->beginTransaction();
 		foreach ($_POST['goods_sku'] as $oldRecId=>$skuItems) {
-			$skuId = $container['order']->checkSkuIdExists($skuItems);
+			$skuId = $orderService->checkSkuIdExists($skuItems);
 			if (!$skuId) {
-				$skuId = $container['orderW']->insert('goods_sku', $skuItems);
+				$skuId = $orderWService->insert('goods_sku', $skuItems);
 				if (!$skuId) {
-					$container['orderW']->rollBack();
+					$orderWService->rollBack();
 					$response['msg'] = "insert goods sku failed.";
 					$logger->error($response['msg']);
 				    $slim->render($jsonTpl, array('value' => $response, 'json_format' => $jsonFormat));
@@ -65,7 +67,7 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 			}
 			$skuIds[$oldRecId] = $skuId;
 		}
-		$res = $container['orderW']->commit();
+		$res = $orderWService->commit();
 		if (!$res) {
 			$response['msg'] = "insert goods sku transaction commit failed.";
 			$logger->error($response['msg']);
@@ -88,7 +90,7 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 	// insert goods style
 	$goodsStyleIds = array();
 	if (isset($_POST['goods_style']) && is_array($_POST['goods_style']) && !empty($skuIds)) {
-		$container['orderW']->beginTransaction();
+		$orderWService->beginTransaction();
 		foreach ($_POST['goods_style'] as $oldRecId => $styleItems) {
 			// sku can not be empty
 			if (!isset($skus[$oldRecId]) || empty($skus[$oldRecId])) {
@@ -98,12 +100,12 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 			$styleItems['sku_id'] = isset($skuIds[$oldRecId]) ? $skuIds[$oldRecId] : 0;
 			// replace old sku with new sku
 			$styleItems['sku'] = $skus[$oldRecId];
-			$gStyleId = $container['order']->checkGStyleIdExists($styleItems);
+			$gStyleId = $orderService->checkGStyleIdExists($styleItems);
 			if (!$gStyleId) {
 				$styleItems['style_price'] = $_POST['order_goods'][$oldRecId]['shop_price'];
-				$gStyleId = $container['orderW']->insert('goods_style', $styleItems);
+				$gStyleId = $orderWService->insert('goods_style', $styleItems);
 				if (!$gStyleId) {
-					$container['orderW']->rollBack();
+					$orderWService->rollBack();
 					$response['msg'] = "insert goods style failed.";
 					$logger->error($response['msg']);
 				    $slim->render($jsonTpl, array('value' => $response, 'json_format' => $jsonFormat));
@@ -112,7 +114,7 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 			}
 			$goodsStyleIds[$oldRecId] = $gStyleId;
 		}
-		$res = $container['orderW']->commit();
+		$res = $orderWService->commit();
 		if (!$res) {
 			$response['msg'] = "insert goods style transaction commit failed.";
 			$logger->error($response['msg']);
@@ -122,15 +124,15 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 	}
 
 	// insert order_info
-	$container['orderW']->beginTransaction();
-	$affectedRows = $container['orderW']->insert('order_info', array($_POST['order_info']));
+	$orderWService->beginTransaction();
+	$affectedRows = $orderWService->insert('order_info', array($_POST['order_info']));
 	if (!$affectedRows) {
 		$response['msg'] = "insert order info failed.";
 		$logger->error($response['msg']);
 	    $slim->render($jsonTpl, array('value' => $response, 'json_format' => $jsonFormat));
 		die;
 	}
-	$orderId = $container['orderW']->getLastInsertId();
+	$orderId = $orderWService->getLastInsertId();
 	// insert order_goods
 	$recIds = array();
 	foreach ($_POST['order_goods'] as $oldRecId=>$orderGoods) {
@@ -138,15 +140,15 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 		$orderGoods['goods_style_id'] = $goodsStyleIds[$oldRecId];
 		$orderGoods['sku'] = $skus[$oldRecId];
 		$orderGoods['sku_id'] = isset($skuIds[$oldRecId]) ? $skuIds[$oldRecId] : 0;
-		$affectedRows = $container['orderW']->insert('order_goods', $_POST['order_goods']);
+		$affectedRows = $orderWService->insert('order_goods', $_POST['order_goods']);
 		if (!$affectedRows) {
-			$container['orderW']->rollBack();
+			$orderWService->rollBack();
 			$response['msg'] = "insert order goods failed.";
 			$logger->error($response['msg']);
 		    $slim->render($jsonTpl, array('value' => $response, 'json_format' => $jsonFormat));
 			die;
 		}
-		$newRecId = $container['orderW']->getLastInsertId();
+		$newRecId = $orderWService->getLastInsertId();
 		$recIds[$oldRecId] = $newRecId;
 	}
 	// insert order_extension
@@ -156,16 +158,16 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 			'ext_name' => 'newRecIds',
 			'ext_value' => json_encode($recIds),
 		));
-		$affectedRows = $container['orderW']->insert('order_extension', array($_POST['order_extension']));
+		$affectedRows = $orderWService->insert('order_extension', array($_POST['order_extension']));
 		if (!$affectedRows) {
-			$container['orderW']->rollBack();
+			$orderWService->rollBack();
 			$response['msg'] = "insert order extension failed.";
 			$logger->error($response['msg']);
 		    $slim->render($jsonTpl, array('value' => $response, 'json_format' => $jsonFormat));
 			die;
 		}
 	}
-	$res = $container['orderW']->commit();
+	$res = $orderWService->commit();
 	if (!$res) {
 		$response['msg'] = "insert transaction commit failed.";
 		$logger->error($response['msg']);
@@ -183,6 +185,8 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 $container['slim']->post($prefix.'/pay/:orderSn', function ($orderSn) use ($container, $logger) {
 
 	$slim = $container['slim'];
+	$orderService = $container['order'];
+	$orderWService = $container['orderW'];
 	$response = array('code' => 0, 'msg' => '', 'data' => array());
 	$jsonTpl = 'json.tpl';
 	$paid = 2;
@@ -193,7 +197,7 @@ $container['slim']->post($prefix.'/pay/:orderSn', function ($orderSn) use ($cont
 	    $slim->render($jsonTpl, array('value' => $response, 'json_format' => JSON_FORCE_OBJECT | JSON_PRETTY_PRINT));
 		die;
 	}
-	if (!$container['order']->checkOrderSnExists($orderSn)) {
+	if (!$orderService->checkOrderSnExists($orderSn)) {
 		$response['msg'] = "order not exists.";
 		$logger->error($response['msg']);
 	    $slim->render($jsonTpl, array('value' => $response, 'json_format' => JSON_FORCE_OBJECT | JSON_PRETTY_PRINT));
@@ -202,7 +206,7 @@ $container['slim']->post($prefix.'/pay/:orderSn', function ($orderSn) use ($cont
 
 	$update = array('pay_status'=>$paid);
 	$query['where'] = 'order_sn = '.$orderSn;
-	$affectedRows = $container['order']->update('order_info', $update, $query);
+	$affectedRows = $orderWService->update('order_info', $update, $query);
 	if ($affectedRows === false) {
 		$response['msg'] = "sql execute failed.";
 		$logger->error($response['msg']);
