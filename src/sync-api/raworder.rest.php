@@ -3,12 +3,13 @@ include_once dirname(__DIR__) . '/common.php';
 
 use esmeralda_service\base\P11C;
 use esmeralda_service\base\Util;
+use esmeralda_service\base\ApiLogFactory;
 
 $prefix = '/sync-apis/raworder';
 
 $logger = ApiLogFactory::get('raworder.rest');
 
-$container['slim']->post($prefix.'/post/:domain', function ($domain) use ($container) {
+$container['slim']->post($prefix.'/post/:domain', function ($domain) use ($container, $logger) {
 
 	$slim = $container['slim'];
 	$response = array('code' => 0, 'msg' => '', 'data' => array());
@@ -179,7 +180,7 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 	$slim->render($jsonTpl, array('value' => $response, 'json_format' => $jsonFormat));
 });
 
-$container['slim']->post($prefix.'/pay/:orderSn', function ($orderSn) use ($container) {
+$container['slim']->post($prefix.'/pay/:orderSn', function ($orderSn) use ($container, $logger) {
 
 	$slim = $container['slim'];
 	$response = array('code' => 0, 'msg' => '', 'data' => array());

@@ -8,7 +8,7 @@ $logger->error('hello world.');
 
 $prefix = '/sync-apis/purchase';
 
-$container['slim']->post($prefix, function () use ($container) {
+$container['slim']->post($prefix, function () use ($container, $logger) {
 	$slim = $container['slim'];
 	$response = array('code' => 0, 'msg' => '');
 	$jsonTpl = 'json.tpl';
