@@ -9,7 +9,8 @@ $logger = ApiLogFactory::get('purchase.rest');
 
 $container['slim']->post($prefix, function () use ($container, $logger) {
 	$slim = $container['slim'];
-	$response = array('code' => 0, 'msg' => '');
+	// code=>1 means that the error occurred (erp need)
+	$response = array('code' => 1, 'msg' => '');
 	$jsonTpl = 'json.tpl';
 	$jsonFormat = JSON_FORCE_OBJECT | JSON_PRETTY_PRINT;
 
@@ -38,7 +39,7 @@ $container['slim']->post($prefix, function () use ($container, $logger) {
 	}
 
 	// success return
-	$response['code'] = 1;
+	$response['code'] = 0;
 	$response['msg'] = "success.";
 	$slim->render($jsonTpl, array('value' => $response, 'json_format' => $jsonFormat));
 });

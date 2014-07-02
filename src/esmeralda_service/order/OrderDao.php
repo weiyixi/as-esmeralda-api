@@ -180,7 +180,7 @@ EOSQL;
     public function checkOrderSnExists($orderSn) {
         $sql = <<<EOSQL
             /* OrderDao.checkOrderSnExists */
-            SELECT 1
+            SELECT order_id
             FROM {$this->_T('order_info')}
             WHERE order_sn = :orderSn
             LIMIT 1
@@ -205,11 +205,11 @@ EOSQL;
         foreach ($skuItems as $k => $v) {
             $columns[] = $k . ' = ?';
         }
-        $columns = implode(', ', $columns);
+        $columns = implode(' AND ', $columns);
 
         $sql = <<<EOSQL
             /* OrderDao.checkSkuIdExists */
-            SELECT 1
+            SELECT sku_id
             FROM {$this->_T('goods_sku')}
             WHERE {$columns}
             LIMIT 1
@@ -234,11 +234,11 @@ EOSQL;
         foreach ($styleItems as $k => $v) {
             $columns[] = $k . ' = ?';
         }
-        $columns = implode(', ', $columns);
+        $columns = implode(' AND ', $columns);
 
         $sql = <<<EOSQL
             /* OrderDao.checkGStyleIdExists */
-            SELECT 1
+            SELECT goods_style_id
             FROM {$this->_T('goods_style')}
             WHERE {$columns}
             LIMIT 1

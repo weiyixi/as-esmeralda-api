@@ -2,8 +2,8 @@
 include_once dirname(__DIR__) . '/common.php';
 
 use esmeralda_service\base\P11C;
-use esmeralda_service\base\Util;
 use esmeralda_service\base\ApiLogFactory;
+use esmeralda_service\base\Util;
 
 $prefix = '/sync-apis/raworder';
 
@@ -125,7 +125,7 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 
 	// insert order_info
 	$orderWService->beginTransaction();
-	$affectedRows = $orderWService->insert('order_info', array($_POST['order_info']));
+	$affectedRows = $orderWService->insert('order_info', $_POST['order_info']);
 	if (!$affectedRows) {
 		$response['msg'] = "insert order info failed.";
 		$logger->error($response['msg']);
@@ -140,7 +140,7 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 		$orderGoods['goods_style_id'] = $goodsStyleIds[$oldRecId];
 		$orderGoods['sku'] = $skus[$oldRecId];
 		$orderGoods['sku_id'] = isset($skuIds[$oldRecId]) ? $skuIds[$oldRecId] : 0;
-		$affectedRows = $orderWService->insert('order_goods', $_POST['order_goods']);
+		$affectedRows = $orderWService->insert('order_goods', $orderGoods);
 		if (!$affectedRows) {
 			$orderWService->rollBack();
 			$response['msg'] = "insert order goods failed.";
@@ -154,11 +154,12 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 	// insert order_extension
 	if (isset($_POST['order_extension']) && !empty($_POST['order_extension'])) {
 		array_push($_POST['order_extension'], array(
-			'order_id' => $orderId,
 			'ext_name' => 'newRecIds',
 			'ext_value' => json_encode($recIds),
+			'order_id' => $orderId,
 		));
-		$affectedRows = $orderWService->insert('order_extension', array($_POST['order_extension']));
+		$_POST['order_extension'] = array_map(function(&$row) use ($orderId){$row['order_id'] = $orderId; return $row;}, $_POST['order_extension']);
+		$affectedRows = $orderWService->insert('order_extension', $_POST['order_extension']);
 		if (!$affectedRows) {
 			$orderWService->rollBack();
 			$response['msg'] = "insert order extension failed.";
@@ -205,10 +206,10 @@ $container['slim']->post($prefix.'/pay/:orderSn', function ($orderSn) use ($cont
 	}
 
 	$update = array('pay_status'=>$paid);
-	$query['where'] = 'order_sn = '.$orderSn;
+	$query['where'] = "order_sn = '{$orderSn}'";
 	$affectedRows = $orderWService->update('order_info', $update, $query);
 	if ($affectedRows === false) {
-		$response['msg'] = "sql execute failed.";
+		$response['msg'] = "update pay status failed.";
 		$logger->error($response['msg']);
 	    $slim->render($jsonTpl, array('value' => $response, 'json_format' => JSON_FORCE_OBJECT | JSON_PRETTY_PRINT));
 		die;
