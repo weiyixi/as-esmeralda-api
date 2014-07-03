@@ -26,6 +26,13 @@ $container['slim']->post($prefix, function () use ($container, $logger) {
 	    $slim->render($jsonTpl, array('value' => $response, 'json_format' => $jsonFormat));
 		die;
 	}
+	$orderCopyInfo = $container['order']->getOrderCopyLog($_POST['order_sn']);
+	if (!empty($orderCopyInfo)) {
+		$response['code'] = 0;
+		$response['msg'] = "order exists.";
+	    $slim->render($jsonTpl, array('value' => $response, 'json_format' => $jsonFormat));
+		die;
+	}	
 
 	$affectedRows = $container['orderW']->insert('order_copy_log', array(
 		'order_sn' => $_POST['order_sn'],

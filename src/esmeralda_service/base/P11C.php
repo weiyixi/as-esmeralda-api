@@ -16,7 +16,8 @@ class P11C{
         'faucetland' => 'FL',
         'amormoda' => 'AA',
         'jennyjoseph' => 'PH',
-        'azazie' => 'ZZ'
+        'azazie' => 'ZZ',
+        'dressdepot' => 'DD'
     );
 
     public static $proCode2Name = array(
@@ -25,5 +26,6 @@ class P11C{
         'AA' => 'Amormoda',
         'PH' => 'JennyJoseph',
         'ZZ' => 'Azazie',
+        'DD' => 'DressDepot'
     );
 }
