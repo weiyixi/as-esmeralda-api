@@ -6,7 +6,7 @@ use Monolog\Handler\SwiftMailerHandler;
 use esmeralda_service\base\BaseEditDao;
 use esmeralda_service\order\OrderDao;
 use esmeralda_service\order\DbOrderWService;
-use esmeralda_service\order\DBOrderService;
+use esmeralda_service\order\DbOrderService;
 
 class SlimWrapper extends \Slim\Slim{
     public function __construct($options){
