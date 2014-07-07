@@ -56,14 +56,14 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 		foreach ($_POST['goods_sku'] as $oldRecId=>$skuItems) {
 			$skuId = $orderService->checkSkuIdExists($skuItems);
 			if (!$skuId) {
-				$skuId = $orderWService->insert('goods_sku', $skuItems);
-				if (!$skuId) {
+				if (!$orderWService->insert('goods_sku', $skuItems)) {
 					$orderWService->rollBack();
 					$response['msg'] = "insert goods sku failed.";
 					$logger->error($response['msg']);
 				    $slim->render($jsonTpl, array('value' => $response, 'json_format' => $jsonFormat));
 					die;
 				}
+				$skuId = $orderWService->getLastInsertId();
 			}
 			$skuIds[$oldRecId] = $skuId;
 		}
@@ -103,14 +103,14 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 			$gStyleId = $orderService->checkGStyleIdExists($styleItems);
 			if (!$gStyleId) {
 				$styleItems['style_price'] = $_POST['order_goods'][$oldRecId]['shop_price'];
-				$gStyleId = $orderWService->insert('goods_style', $styleItems);
-				if (!$gStyleId) {
+				if (!$orderWService->insert('goods_style', $styleItems)) {
 					$orderWService->rollBack();
 					$response['msg'] = "insert goods style failed.";
 					$logger->error($response['msg']);
 				    $slim->render($jsonTpl, array('value' => $response, 'json_format' => $jsonFormat));
 					die;
 				}
+				$gStyleId = $orderWService->getLastInsertId();
 			}
 			$goodsStyleIds[$oldRecId] = $gStyleId;
 		}
