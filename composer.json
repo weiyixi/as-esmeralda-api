@@ -19,8 +19,12 @@
     ],
     "repositories": [
         {
-            "type": "vcs",
+            "type": "composer",
             "url":  "http://deployer-test.opvalue.com"
+        },
+        {
+            "type": "vcs",
+            "url":  "https://g.pupugao.com/v5/esmeralda.git"
         }
     ],
     "require": {
