@@ -20,11 +20,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url":  "file:///Users/blu3gui7ar/work/projects/git-ws/esmeralda"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/blu3gui7ar/Slim-Monolog.git"
+            "url":  "http://deployer-test.opvalue.com"
         }
     ],
     "require": {
