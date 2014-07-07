@@ -80,7 +80,7 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 	$skus = array();
 	foreach ($_POST['order_goods'] as $oldRecId=>$orderGoods) {
 		$sku = $orderGoods['sku'];
-		$sku = preg_replace('/(\d*)(g\d+)([a-fh-z]?)/', '\1g'.$orderGoods['goods_id'].'\3', $sku);
+//		$sku = preg_replace('/(\d*)(g\d+)([a-fh-z]?)/', '\1g'.$orderGoods['goods_id'].'\3', $sku);
 		if (isset($skuIds[$oldRecId])) {
 			$sku = preg_replace('/(\d*)(z\d+)([a-y]?)/', '\1z'.$skuIds[$oldRecId].'\3', $sku);
 		}
