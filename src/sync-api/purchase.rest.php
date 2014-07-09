@@ -14,6 +14,8 @@ $container['slim']->post($prefix, function () use ($container, $logger) {
 	$jsonTpl = 'json.tpl';
 	$jsonFormat = JSON_FORCE_OBJECT | JSON_PRETTY_PRINT;
 
+	$logger->info("Received purchase request. Request data: \n".print_r($_POST, true));
+
 	if (!isset($_POST['order_sn']) || empty($_POST['order_sn'])) {
 		$response['msg'] = "missing order sn.";
 		$logger->error($response['msg']);
@@ -30,6 +32,7 @@ $container['slim']->post($prefix, function () use ($container, $logger) {
 	if (!empty($orderCopyInfo)) {
 		$response['code'] = 0;
 		$response['msg'] = "order exists.";
+		$logger->info($response['msg']);
 	    $slim->render($jsonTpl, array('value' => $response, 'json_format' => $jsonFormat));
 		die;
 	}	
@@ -48,6 +51,7 @@ $container['slim']->post($prefix, function () use ($container, $logger) {
 	// success return
 	$response['code'] = 0;
 	$response['msg'] = "success.";
+	$logger->info($response['msg']);
 	$slim->render($jsonTpl, array('value' => $response, 'json_format' => $jsonFormat));
 });
 
