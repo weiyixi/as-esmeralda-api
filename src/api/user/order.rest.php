@@ -1,7 +1,7 @@
 <?php
 include_once __DIR__ . '/../../common.php';
 
-$prefix = '/apis/user/:uid/cart';
+$prefix = '/apis/user/:uid/order';
 
 function getSessionId($sid){
     if(empty($sid)){
@@ -34,12 +34,11 @@ function getUserId($uid){
 //{{{ GET: $prefix
 $container['slim']->get($prefix, function($uid) use ($container){
     $app = $container['slim'];
-    $sessionId = getSessionId($app->request->get('sid'));
     $userId = getUserId($uid);
 
-    $cartService = $container['user.cart'];
+    $orderService = $container['user.order'];
     //$domain = Util::conf('domain');
-    $cart = $cartService->get($userId, $sessionId);
+    $orderList = $orderService->getOrders($userId);
 
     $container['slim']->render('json.tpl', array(
         'value' => $cart,
@@ -52,23 +51,55 @@ $container['slim']->get($prefix, function($uid) use ($container){
 //{{{ POST: $prefix
 $container['slim']->post("$prefix", function($uid) use ($container){
     $app = $container['slim'];
-    $sessionId = getSessionId($app->request->get('sid'));
     $userId = getUserId($uid);
     $contentType = $app->request->headers->get('Content-Type');
     switch($contentType){
     case 'application/x-www-form-urlencoded':
-        $items = $app->request->post('styles');
+        $order = $app->request->post('styles');
         break;
     case 'application/json':
     default:
         $body = $app->request->getBody();
-        $items = json_decode($body, true);
+        $body= <<<JSON
+{
+"addressId":1,
+"shipId":1,
+"couponCode":"",
+"importantDay":"2014-07-10",
+"order_track_id":"d6f8826c13800cfa1751d750618cad9f",
+"livechatinc":{
+        "goal_id":"1111",
+        "visitor_id":"S1403679406.1203f75fc3"
+    },
+"payment_id":157,
+"postscript":""
+}
+JSON;
+        $order = json_decode($body, true);
         break;
     }
 
+    $addrService = $container['user.address'];
+    $address = $addrService->get($userId, $order->addressId);
+
+    $shipService = $container['shipping'];
+    $shipment = $shipService->get($order->shipId);
+
+    $payService = $container['payment'];
+    $payment = $payService->get($order->paymentId);
+
+    $sessionId = getSessionId(null);
     $cartService = $container['user.cart'];
+    $cart = $cartService->get($userId, $sessionId);
+
+    $orderService = $container['user.order'];
     //$domain = Util::conf('domain');
-    $rs = $cartService->add($userId, $sessionId, $items);
+
+    /*
+     * Parse address info. If not saved, save it.
+     */
+
+    $rs = $orderService->create($userId, $orderInfo);
 
     $container['slim']->render('json.tpl', array(
         'value' => $rs,
@@ -78,8 +109,8 @@ $container['slim']->post("$prefix", function($uid) use ($container){
     ));
 });
 //}}}
-//{{{ POST: $prefix/:id
-$container['slim']->post("$prefix/:id", function($uid, $id) use ($container){
+//{{{ POST: $prefix/:sn
+$container['slim']->post("$prefix/:sn", function($uid, $orderSn) use ($container){
     $app = $container['slim'];
     $sessionId = getSessionId($app->request->get('sid'));
     $userId = getUserId($uid);
@@ -108,11 +139,6 @@ $container['slim']->post("$prefix/:id", function($uid, $id) use ($container){
         'APP_WEB_ROOT' => $container['APP_WEB_ROOT'],
         'PUBLIC_ROOT' => $container['PUBLIC_ROOT'],
     ));
-});
-//}}}
-//{{{ DELETE: $prefix(/:id)
-$container['slim']->delete("$prefix(/:id)", function($id) use ($container){
-    //remove OR empty
 });
 //}}}
 

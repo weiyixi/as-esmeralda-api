@@ -39,6 +39,8 @@ function getProducts($ids, $status, $lang = null) {
     return $products;
 }
 
+
+//{{{ GET: $prefix/base/:ids/:domain
 $container['slim']->get("$prefix/base/:ids/:domain", function($ids, $domain) use ($container){
     $ids = parseIds($ids);
     // limit 200
@@ -61,7 +63,8 @@ $container['slim']->get("$prefix/base/:ids/:domain", function($ids, $domain) use
         'PUBLIC_ROOT' => $container['PUBLIC_ROOT'],
     ));
 });
-
+//}}}
+//{{{ GET: $prefix/styles/:ids
 $container['slim']->get("$prefix/styles/:ids", function($ids) use ($container){
     $ids = parseIds($ids);
     // limit 200
@@ -114,7 +117,8 @@ $container['slim']->get("$prefix/styles/:ids", function($ids) use ($container){
         'json_format' => JSON_FORCE_OBJECT | JSON_PRETTY_PRINT,
     ));
 });
-
+//}}}
+//{{{ GET: $prefix/ids/:range
 $container['slim']->get("$prefix/ids/:range", function($range) use ($container){
     list($min, $limit) = explode(':', $range);
     $slim = $container['slim'];
@@ -139,5 +143,6 @@ $container['slim']->get("$prefix/ids/:range", function($range) use ($container){
         'json_format' => JSON_FORCE_OBJECT | JSON_PRETTY_PRINT,
     ));
 });
+//}}}
 
 $container['slim']->run();

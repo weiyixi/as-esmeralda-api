@@ -3,6 +3,7 @@ include_once __DIR__ . '/../common.php';
 
 $prefix = '/apis/product/:domain';
 
+//{{{ GET: $prefix/:id
 $container['slim']->get("$prefix/:id", function($domain, $id) use ($container){
     $slim = $container['slim'];
     $status = $slim->request->params('status');
@@ -25,7 +26,8 @@ $container['slim']->get("$prefix/:id", function($domain, $id) use ($container){
         'PUBLIC_ROOT' => $container['PUBLIC_ROOT'],
     ));
 });
-
+//}}}
+//{{{ GET: $prefix/:id/detail
 $container['slim']->get("$prefix/:id/detail", function($domain, $id) use ($container){
     $detail = $container['product']->getProductDetail($id);
     $container['slim']->render('json.tpl', array(
@@ -35,6 +37,7 @@ $container['slim']->get("$prefix/:id/detail", function($domain, $id) use ($conta
         'PUBLIC_ROOT' => $container['PUBLIC_ROOT'],
     ));
 });
+//}}}
 
 // $container['slim']->get("$prefix/:id/nls(/:lang)", function($domain, $id, $lang = 'en') use ($container){
 // 	$timeStart = microtime(true);

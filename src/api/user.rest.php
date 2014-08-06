@@ -10,6 +10,7 @@ include_once __DIR__ . '/../common.php';
 
 $prefix = '/apis/user';
 
+//{{{ GET: $prefix/:uid
 $container['slim']->get("$prefix/:uid", function($uid) use ($container){
     $userService = $container['user'];
     $user = null;
@@ -28,6 +29,7 @@ $container['slim']->get("$prefix/:uid", function($uid) use ($container){
         'PUBLIC_ROOT' => $container['PUBLIC_ROOT'],
     ));
 });
+//}}}
 
 $container['slim']->post("$prefix", function() use ($container){
     //create user
