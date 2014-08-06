@@ -23,7 +23,7 @@ if($vendor_load && file_exists($vendor_load)){
     require_once $APP_FS_ROOT.'/vendor/autoload.php';
 }
 
-$container = new Pimple();
+$container = new Pimple\Container();
 $container['APP_FS_ROOT'] = $APP_FS_ROOT;
 $container['APP_WEB_ROOT'] = $APP_WEB_ROOT;
 $container['PUBLIC_ROOT'] = $APP_WEB_ROOT.'public';

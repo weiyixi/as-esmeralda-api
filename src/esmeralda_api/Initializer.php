@@ -46,7 +46,7 @@ class Initializer{
 
     public function initWeb($container){
         $t = $this;
-        $container['tplengine'] = $container->share(function($c) use ($t){
+        $container['tplengine'] = function($c) use ($t){
             $siteConf = $c['siteConf'];
             $twig = new \Slim\Views\Twig();
             $twig->twigTemplateDirs = $t->tplPath();
@@ -59,15 +59,15 @@ class Initializer{
                 new \Twig_Extension_Debug(),
             );
             return $twig;
-        });
+        };
 
-        $container['slim_logger'] = $container->share(function($c){
+        $container['slim_logger'] = function($c){
             return new \Flynsarmy\SlimMonolog\Log\MonologWriter(array(
                 'handlers' => $c['log_handlers'],
             ));
-        });
+        };
 
-        $container['slim'] = $container->share(function($c){
+        $container['slim'] = function($c){
             $siteConf = $c['siteConf'];
             \Slim\Route::setDefaultConditions(array(
                 'lang' => '[a-z]{2}'
@@ -80,13 +80,13 @@ class Initializer{
                 'debug' => isset($siteConf['slim.debug']) ? $siteConf['slim.debug'] : false,
                 'view' => $c['tplengine'],
             ));
-        });
+        };
 
         return $container;
     }
 
     public function initBase($container){
-        $container['api_log_handlers'] = $container->share(function($c){
+        $container['api_log_handlers'] = function($c){
             $siteConf = $c['siteConf'];
             if(!isset($siteConf['api_log_dir'])){
                 $siteConf['api_log_dir'] = '/var/log/esmeralda-api';
@@ -99,22 +99,22 @@ class Initializer{
                 new SwiftMailerHandler(\Swift_Mailer::newInstance($transport), $message, Logger::CRITICAL),
             );
             return $handers;
-        });
+        };
 
         return $container;
     }
 
     public function initServices($container){
-        $container['order'] = $container->share(function($c){
+        $container['order'] = function($c){
             $siteConf = $c['siteConf'];
             $dao = new OrderDao($c);
             return new DBOrderService($dao, $siteConf['domain']);
-        });
-        $container['orderW'] = $container->share(function ($c) {
+        };
+        $container['orderW'] = function ($c) {
             $siteConf = $c['siteConf'];
             $editDao = new BaseEditDao($c);
             return new DbOrderWService($editDao, $siteConf['domain']);
-        });
+        };
 
         return $container;
     }
