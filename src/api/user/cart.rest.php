@@ -14,9 +14,11 @@ function getSessionId($sid){
     }else{
         $sessionId = $sid;
     }
+    return $sessionId;
 }
 
 function getUserId($uid){
+    return $uid;
     global $container;
     $userService = $container['user'];
     $userId = 0;
@@ -52,30 +54,59 @@ $container['slim']->get($prefix, function($uid) use ($container){
 //{{{ POST: $prefix
 $container['slim']->post("$prefix", function($uid) use ($container){
     $app = $container['slim'];
+    $cartService = $container['user.cart'];
     $sessionId = getSessionId($app->request->get('sid'));
     $userId = getUserId($uid);
     $contentType = $app->request->headers->get('Content-Type');
+    
     switch($contentType){
     case 'application/x-www-form-urlencoded':
-        $items = $app->request->post('styles');
+        $backUrl = $app->request->get('back');
+        if (empty($backUrl)) {
+            $backUrl = $app->request->getReferrer();
+        }
+        // build cart item
+        $styles = $app->request->post('styles');
+        $goodsId = $app->request->post('goods_id');
+        $goodsNumber = $app->request->post('goods_number');
+        $lang = $app->request->post('lang');
+		if (!empty($styles['size_type'])) {
+            $isCustomSize = $app->request->post('custom') == 'on';
+			$styles['size_type'] = !$isCustomSize ? '_inch' : $styles['size_type'];
+		}
+        $product = $container['product']->getProduct($goodsId, $lang);
+        $items = array(
+            array(
+                'id' => $goodsId,
+                'number' => $goodsNumber,
+                'styles' => $styles,
+                'sn' => isset($product->goods_sn) ? $product->goods_sn : '',
+                'name' => isset($product->name) ? $product->name : '',
+                'marketPrice' => isset($product->market_price) ? $product->market_price : 0,
+                'shopPrice' => isset($product->shop_price) ? $product->shop_price : 0,
+            )
+        );
+        // add item to shopping cart
+        $rs = $cartService->add($userId, $sessionId, $items);
+        // redirect to backURL
+        header("Location: $backUrl");
         break;
     case 'application/json':
     default:
         $body = $app->request->getBody();
         $items = json_decode($body, true);
+        //$domain = Util::conf('domain');
+        $rs = $cartService->add($userId, $sessionId, $items);
+        $container['slim']->render('json.tpl', array(
+            'value' => $rs,
+            'json_format' => JSON_FORCE_OBJECT | JSON_PRETTY_PRINT,
+            'APP_WEB_ROOT' => $container['APP_WEB_ROOT'],
+            'PUBLIC_ROOT' => $container['PUBLIC_ROOT'],
+        ));
         break;
     }
 
-    $cartService = $container['user.cart'];
-    //$domain = Util::conf('domain');
-    $rs = $cartService->add($userId, $sessionId, $items);
 
-    $container['slim']->render('json.tpl', array(
-        'value' => $rs,
-        'json_format' => JSON_FORCE_OBJECT | JSON_PRETTY_PRINT,
-        'APP_WEB_ROOT' => $container['APP_WEB_ROOT'],
-        'PUBLIC_ROOT' => $container['PUBLIC_ROOT'],
-    ));
 });
 //}}}
 //{{{ POST: $prefix/:id
@@ -84,23 +115,27 @@ $container['slim']->post("$prefix/:id", function($uid, $id) use ($container){
     $sessionId = getSessionId($app->request->get('sid'));
     $userId = getUserId($uid);
     $contentType = $app->request->headers->get('Content-Type');
-    switch($contentType){
-    case 'application/x-www-form-urlencoded':
+    $cartService = $container['user.cart'];
+    if (strpos($contentType, 'application/x-www-form-urlencoded') !== false) {
         $params = array();
         $params['styles'] = $app->request->post('styles');
-        $params['number'] = $app->request->post('number');
+        $params['number'] = $app->request->post('goods_number');
         $params['quantity'] = $app->request->post('quantity');
         $params['custom'] = $app->request->post('custom');
+        $rs = $cartService->update($userId, $sessionId, $id, $params['number']);
+        $code = $rs ? 0 : 1;
+        echo json_encode(array('code' => $code));die;
+    }
+
+    switch($contentType){
+    case 'application/x-www-form-urlencoded':
         break;
     case 'application/json':
     default:
         $params = json_decode($app->request->getBody());
+        $rs = $cartService->update($userId, $sessionId, $id, $params['number']);
         break;
     }
-
-    $cartService = $container['user.cart'];
-    //$domain = Util::conf('domain');
-    $rs = $cartService->update($userId, $sessionId, $id, $params);
 
     $container['slim']->render('json.tpl', array(
         'value' => $rs,
@@ -111,8 +146,27 @@ $container['slim']->post("$prefix/:id", function($uid, $id) use ($container){
 });
 //}}}
 //{{{ DELETE: $prefix(/:id)
-$container['slim']->delete("$prefix(/:id)", function($id) use ($container){
+$container['slim']->delete("$prefix(/:id)", function($uid, $id) use ($container){
+    $app = $container['slim'];
+    $sessionId = getSessionId($app->request->get('sid'));
+    $userId = getUserId($uid);
+    $contentType = $app->request->getContentType();;
     //remove OR empty
+    $backUrl = $app->request->get('back');
+    if (empty($backUrl)) {
+        $backUrl = $app->request->getReferrer();
+    }
+
+    $cartService = $container['user.cart'];
+    $rs = $cartService->remove($userId, $sessionId, $id);
+
+    header("Location: $backUrl");
+    //$container['slim']->render('json.tpl', array(
+    //    'value' => $rs,
+    //    'json_format' => JSON_FORCE_OBJECT | JSON_PRETTY_PRINT,
+    //    'APP_WEB_ROOT' => $container['APP_WEB_ROOT'],
+    //    'PUBLIC_ROOT' => $container['PUBLIC_ROOT'],
+    //));
 });
 //}}}
 
