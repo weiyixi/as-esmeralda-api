@@ -1,5 +1,6 @@
 <?php
 include_once __DIR__ . '/../../common.php';
+use lestore\util\Helper;
 
 $prefix = '/apis/user/:uid/cart';
 
@@ -116,15 +117,40 @@ $container['slim']->post("$prefix/:id", function($uid, $id) use ($container){
     $userId = getUserId($uid);
     $contentType = $app->request->headers->get('Content-Type');
     $cartService = $container['user.cart'];
+    $productService = $container['product'];
     if (strpos($contentType, 'application/x-www-form-urlencoded') !== false) {
         $params = array();
         $params['styles'] = $app->request->post('styles');
         $params['number'] = $app->request->post('goods_number');
         $params['quantity'] = $app->request->post('quantity');
         $params['custom'] = $app->request->post('custom');
+        // only consider changing product number
         $rs = $cartService->update($userId, $sessionId, $id, $params['number']);
         $code = $rs ? 0 : 1;
-        echo json_encode(array('code' => $code));die;
+        $r = array();
+        $saved_all = 0;
+        $total_amount = 0;
+        $total_weight = 0;
+        $cartProducts = $cartService->get($userId, $sessionId);
+        foreach ($cartProducts as $key => $cartProduct) {
+            $product = $productService->getProduct($cartProduct->goods_id);
+            if ($cartProduct->rec_id == $id) {
+                $r['shop_price'] = $product->shop_price;
+                $r['total_price'] = $product->shop_price * $cartProduct->goods_number;
+            }
+            $total_weight += $product->goods_weight * $cartProduct->goods_number;
+            $total_amount += $product->shop_price * $cartProduct->goods_number;
+            if ($product->off > 0) {
+                $saved_all += $cartProduct->goods_number * ($product->market_price - $product->shop_price);
+            }
+        }
+        $r['code'] = $code;
+        $r['saved_all'] = $saved_all;
+        $r['item_total'] = count($cartProducts);
+        $r['total_amount'] = $total_amount;
+        $r['total_weight'] = $total_weight;
+        $r['goods_gift_number'] = 0;
+        echo json_encode($r);die;
     }
 
     switch($contentType){
