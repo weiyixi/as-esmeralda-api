@@ -144,5 +144,62 @@ $container['slim']->get("$prefix/ids/:range", function($range) use ($container){
     ));
 });
 //}}}
+//{{{ GET: $prefix/recent/:domain
+$container['slim']->get("$prefix/recent/:domain", function($domain) use ($container){
+    $existHistory = array();
+    if(isset($_COOKIE['goods_view_history'])){
+        $existHistory = explode(',', $_COOKIE['goods_view_history']);
+    }
+    // limit 200
+    $limit = 12;
+    for ($i = 0; $i < min($limit, count($existHistory)); $i++ ) {
+        if ($existHistory[$i] > 0) {
+            $newHistory[] = $existHistory[$i];
+        }
+    }
+
+    $slim = $container['slim'];
+    $status = $slim->request->params('status');
+    if(null == $status){
+        $status = 'active';
+    }
+    $lang = $slim->request->params('lang');
+    $products = getProducts($newHistory, $status, $lang);
+    // @TODO
+    //$favorites = $Shopping->getGoodsFavoritesCount($goods_id);
+
+    $goods_name_show_len = 37;
+    foreach ($products as &$product) {
+		if (strlen($product->name) > $goods_name_show_len + 3) {
+			$goods_name_arr = explode(' ', $product->name);
+			$goods_name_new = '';
+			foreach ($goods_name_arr as $_k => $_v) {
+				if (strlen($goods_name_new) + strlen($_v) <= $goods_name_show_len) {
+					$goods_name_new .= ' ' . $_v;
+				} else {
+					break;
+				}
+			}
+			$product->name = $goods_name_new . '...';
+		}
+		$product->goods_thumb = 's128/' . $product->goods_thumb;
+    }
+    unset($product);
+
+	//setcookie('goods_view_history', $goods_view_history, time() + 365 * 24 * 3600, '/');
+    //$memcache->set('goods_view_history_' . md5($goods_view_history), $r, 0, 3600 * 3);
+    $data = array(
+        'favorites' => 0,
+        'view_history' => $products,
+    );
+
+    $slim->render('json.tpl', array(
+        'value' => $data,
+        'json_format' => JSON_FORCE_OBJECT | JSON_PRETTY_PRINT,
+        'APP_WEB_ROOT' => $container['APP_WEB_ROOT'],
+        'PUBLIC_ROOT' => $container['PUBLIC_ROOT'],
+    ));
+});
+//}}}
 
 $container['slim']->run();
