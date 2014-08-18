@@ -1,14 +1,72 @@
 <?php
-
-include_once __DIR__ . '/../modules/lestore_common.php';
+include_once __DIR__ . '/../common.php';
+use lestore\cart\shipping\ShippingProcessor;
 
 $prefix = '/apis/shipment';
-$container['shipment'] = function($c){
-    //return new ShipmentService();
-};
+
+function getSessionId($sid){
+    if(empty($sid)){
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+        $sessionId = session_id();
+    }else if($sid == 'all'){
+        $sessionId = null;
+    }else{
+        $sessionId = $sid;
+    }
+    return $sessionId;
+}
+
+function getUserId($uid){
+    return $uid;
+    global $container;
+    $userService = $container['user'];
+    $userId = 0;
+    if($uid == 'self'){
+        if(isset($_SESSION['user_id'])){
+            $userId = $_SESSION['user_id'];
+        }
+    }else{
+        $user = $userService->getUserByUID($uid);
+        $userId = $user->user_id;
+    }
+    return $userId;
+}
 
 $container['slim']->get("$prefix/:id", function($id) use ($container){
     //get shipment method
+});
+
+$container['slim']->get("$prefix/user/:uid", function($uid) use ($container){
+    $app = $container['slim'];
+    $cartService = $container['user.cart'];
+    $productService = $container['product'];
+    $lang = $app->request->get('lang');
+    $countryId = $app->request->get('country_id');
+    $sessionId = getSessionId($app->request->get('sid'));
+    $userId = getUserId($uid);
+
+    $cartProducts = $cartService->get($userId, $sessionId);
+    $goods_in_cart = array();
+    foreach ($cartProducts as $key => $cartProduct) {
+        $product = $productService->getProduct($cartProduct->goods_id);
+        $goods_in_cart[$key]['rec_id'] = $cartProduct->rec_id;
+        $goods_in_cart[$key]['goods_id'] = $cartProduct->goods_id;
+        $goods_in_cart[$key]['goods_number'] = $cartProduct->goods_number;
+        $goods_in_cart[$key]['styles'] = json_decode($cartProduct->styles, true);
+        $goods_in_cart[$key]['shop_price'] = $product->shop_price;
+        $goods_in_cart[$key]['market_price'] = $product->market_price;
+    }
+
+    $shippingInfo = ShippingProcessor::getShippingInfo($goods_in_cart, $lang, $countryId);
+
+    $container['slim']->render('json.tpl', array(
+        'value' => $shippingInfo,
+        'json_format' => JSON_FORCE_OBJECT | JSON_PRETTY_PRINT,
+        'APP_WEB_ROOT' => $container['APP_WEB_ROOT'],
+        'PUBLIC_ROOT' => $container['PUBLIC_ROOT'],
+    ));
 });
 
 $container['slim']->run();
