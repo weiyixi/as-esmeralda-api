@@ -1,10 +1,10 @@
 <?php
 $uri = $_SERVER['REQUEST_URI'];
 $subapi = preg_replace('/\/apis\/user\/([\d\w]+)\/(\w+).*/', '/user/$2.rest.php', $uri);
-//if($subapi != $uri){
-//    include __DIR__ . $subapi;
-//    die;
-//}
+if($subapi != $uri){
+    include __DIR__ . $subapi;
+    die;
+}
 
 include_once __DIR__ . '/../common.php';
 
@@ -27,6 +27,47 @@ function isGotoCheckoutPage() {
 	}
 	return false;
 }
+
+//@TODO get?
+//$container['slim']->post("$prefix/logout", function() use ($container){
+$container['slim']->get("$prefix/logout", function() use ($container){
+    $app = $container['slim'];
+    //$sessionId = $app->request->post('sessionId');
+    $sessionId = $app->request->get('sessionId');
+    session_id($sessionId);
+    session_start();
+
+    $reftag = isset($_SESSION['JJSREF']) ? $_SESSION['JJSREF'] : '';
+    $userService = $container['user'];
+    /* @TODO facebook logout
+	if ($_SESSION['reg_recommender'] == 'facebookLogin') {
+		include_once (ROOT_PATH . 'includes/facebook/facebook.php');
+		$facebook = new Facebook(array(
+			'appId' => FB_APPID,
+			'secret' => FB_SECRET,
+			'cookie' => true
+		));
+		$logout_url = $facebook->getLogoutUrl();
+		$session = $facebook->getUser();
+		if (!empty($session)) {
+			$facebook->destroySession();
+			setCookie('fbs_' . FB_APPID, null, time() - 3600, '/', COOKIE_DOMAIN);
+			header("Location: $logout_url");
+			die();
+		}
+	}
+     */
+    $rs = $userService->logout();
+    $_SESSION['JJSREF'] = $reftag;
+    //echo json_encode($rs);die;
+
+    $back = $app->request->get('back');
+	$back = preg_replace("/isLoginBack=(\d+)/i", "", $back);
+    if (empty($back)) {
+        $back = $app->request->getReferrer();
+    }
+    header("Location: $back");
+});
 
 //{{{ GET: $prefix/:uid
 $container['slim']->get("$prefix/:uid", function($uid) use ($container){
@@ -87,6 +128,27 @@ $container['slim']->post("$prefix/login", function() use ($container){
     }
     echo json_encode($r);die;
 });
+
+$container['slim']->post("$prefix/register", function() use ($container){
+    $app = $container['slim'];
+    $userService = $container['user'];
+    $back = $app->request->get('back');
+    $sessionId = $app->request->post('sessionId');
+    $loginInfo = $app->request->post('login');
+    $r = array(
+        'error' => 1,
+        'back' => $back,
+		'msg' => 'page_login_miss_email',
+    );
+
+    $back = isset($_REQUEST['back']) ? $_REQUEST['back'] : $WEB_ROOT;
+    $is_ajax = isset($_REQUEST['is_ajax']) ? $_REQUEST['is_ajax'] : '';
+    $checkEmail = isset($_REQUEST['checkEmail']) ? $_REQUEST['checkEmail'] : '';
+    $email = isset($_REQUEST['email']) ? $_REQUEST['email'] : '';
+    $from = isset($_REQUEST['from']) ? $_REQUEST['from'] : PROJECT_NAME_LOWER;
+    $userInfo = $_SESSION;
+});
+
 
 $container['slim']->post("$prefix", function() use ($container){
     //create user
