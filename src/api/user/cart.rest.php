@@ -36,8 +36,7 @@ function getUserId($uid){
     return $userId;
 }
 
-function alert_back($msg, $url = '', $die = true)
-{
+function alert_back($msg, $url = '', $die = true) {
 	header('content-type: text/html; charset=utf-8');
 	if (preg_match("/^-?\d+$/is", $url)) {
 		$url = "history.go($url);";

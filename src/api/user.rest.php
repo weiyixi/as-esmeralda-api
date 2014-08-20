@@ -133,20 +133,58 @@ $container['slim']->post("$prefix/register", function() use ($container){
     $app = $container['slim'];
     $userService = $container['user'];
     $back = $app->request->get('back');
+    $checkEmail = $app->request->post('checkEmail');
+    $email = $app->request->post('email');
+    $from = $app->request->post('from');
     $sessionId = $app->request->post('sessionId');
-    $loginInfo = $app->request->post('login');
+    if ( ! empty($sessionId)) {
+        session_id($sessionId);
+        session_start();
+    }
     $r = array(
         'error' => 1,
         'back' => $back,
 		'msg' => 'page_login_miss_email',
     );
+    //if ($_SESSION['user_id']) {
+	//	$r['error'] = 0;
+	//	$r['msg'] = 'page_login_logged_successfully';
+	//	echo json_encode($r);die;
+    //} else if ($checkEmail) {
+	//	$r['error'] = 0;
+    //    // @TODO check email
+	//	//if(check_email($email , $from)){
+	//	//	$r['error'] = 1;
+	//	//  $r['msg'] =  'page_login_email_exists';
+    //    //}
+	//	echo json_encode($r);die;
+    //}
+    if ($from == 'facebook') {
+        // @TODO register from facebook
+    } else {
+        $reg = $app->request->post('reg');
+        if (empty($reg['user_name'])) {
+            $email = $reg['email'];
+            $emails = explode('@', $email);
+            $reg['user_name'] = $emails[0];
+        }
+        $reg['password'] = md5($reg['password']);
+        $reg['password_again'] = md5($reg['password_again']);
+        $rs = $userService->register($reg);
+        $r = array(
+            'error' => 1,
+        );
+        if ($rs) {
+            // @TODO send email
+            // user login
+            $rs = $userService->login($reg['email'], $reg['password']);
+            $r['error'] = 0;
+            $r['back'] = isGotoCheckoutPage() && $back == 'cart.php' ? "checkout.php?act=checkout_payment_process" : $back;
+        }
 
-    $back = isset($_REQUEST['back']) ? $_REQUEST['back'] : $WEB_ROOT;
-    $is_ajax = isset($_REQUEST['is_ajax']) ? $_REQUEST['is_ajax'] : '';
-    $checkEmail = isset($_REQUEST['checkEmail']) ? $_REQUEST['checkEmail'] : '';
-    $email = isset($_REQUEST['email']) ? $_REQUEST['email'] : '';
-    $from = isset($_REQUEST['from']) ? $_REQUEST['from'] : PROJECT_NAME_LOWER;
-    $userInfo = $_SESSION;
+        echo json_encode($r);die;
+    }
+
 });
 
 
