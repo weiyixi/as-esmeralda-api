@@ -2,7 +2,6 @@
 include_once __DIR__ . '/../../common.php';
 use esmeralda\base\Util;
 use esmeralda\base\LogFactory;
-use lestore\util\Helper;
 
 $prefix = '/apis/user/:uid/cart';
 
@@ -34,20 +33,6 @@ function getUserId($uid){
         $userId = $user->user_id;
     }
     return $userId;
-}
-
-function alert_back($msg, $url = '', $die = true) {
-	header('content-type: text/html; charset=utf-8');
-	if (preg_match("/^-?\d+$/is", $url)) {
-		$url = "history.go($url);";
-	} else {
-		$url = "location.href = " . ($url ? "'$url'" : "location.href") . ";";
-	}
-	$msg = str_replace("'", "\\'", $msg);
-	echo "<script>alert('$msg');$url</script>
-    <noscript>Your browser does not support client scripting, such as JavaScript! You must change that in order to visit our website.</noscript>";
-	if ($die)
-		die();
 }
 
 //{{{ GET: $prefix
@@ -103,27 +88,6 @@ $container['slim']->post("$prefix", function($uid) use ($container){
 
     switch($contentType){
     case 'application/x-www-form-urlencoded':
-        // redirect to backURL
-        $backUrl = $app->request->get('back');
-        $buy_now = $app->request->get('la');
-        $referrer = $app->request->getReferrer();
-        if (strtolower($buy_now) == 'buy_now') {
-            $backUrl = '/checkout.php?act=checkout_payment_process';
-        }
-        if (empty($backUrl)) {
-            $backUrl = $referrer;
-        }
-        foreach ($rs as $r) {
-            if ($f == false) {
-                // @FIXME strange action
-                alert_back(Helper::nl('page_cart_add_to_shopping_cart_failed'), $referrer);
-                break;
-            }
-        }
-        // @todo delete wish list if necessary
-        setCookie('JJGA', 'cart_' . $goodsId . '_' . $goodsNumber, time() + 3600, '/', Util::conf('cookie_domain'), false, true);
-        header("Location: $backUrl");
-        break;
     case 'application/json':
     default:
         // render result
@@ -142,48 +106,12 @@ $container['slim']->post("$prefix/:id", function($uid, $id) use ($container){
     $app = $container['slim'];
     $sessionId = getSessionId($app->request->get('sid'));
     $userId = getUserId($uid);
-    $contentType = $app->request->headers->get('Content-Type');
     $cartService = $container['user.cart'];
-    $productService = $container['product'];
 
-    $params = array();
-    $params['styles'] = $app->request->post('styles');
-    $params['number'] = $app->request->post('goods_number');
-    $params['quantity'] = $app->request->post('quantity');
-    $params['custom'] = $app->request->post('custom');
     // only consider changing product number
+    $params = array();
+    $params['number'] = $app->request->post('goods_number');
     $rs = $cartService->update($userId, $sessionId, $id, $params['number']);
-
-    // construct require response result if send it back to website
-    if (strpos($contentType, 'application/x-www-form-urlencoded') !== false) {
-        $code = $rs ? 0 : 1;
-        $r = array();
-        $saved_all = 0;
-        $total_amount = 0;
-        $total_weight = 0;
-        $total_item = 0;
-        $cartProducts = $cartService->get($userId, $sessionId);
-        foreach ($cartProducts as $key => $cartProduct) {
-            $product = $productService->getProduct($cartProduct->goods_id);
-            if ($cartProduct->rec_id == $id) {
-                $r['shop_price'] = $product->shop_price;
-                $r['total_price'] = $product->shop_price * $cartProduct->goods_number;
-            }
-            $total_weight += $product->goods_weight * $cartProduct->goods_number;
-            $total_amount += $product->shop_price * $cartProduct->goods_number;
-            $total_item += $cartProduct->goods_number;
-            if ($product->off > 0) {
-                $saved_all += $cartProduct->goods_number * ($product->market_price - $product->shop_price);
-            }
-        }
-        $r['code'] = $code;
-        $r['saved_all'] = $saved_all;
-        $r['item_total'] = $total_item;
-        $r['total_amount'] = $total_amount;
-        $r['total_weight'] = $total_weight;
-        $r['goods_gift_number'] = 0;
-        $rs = $r;
-    }
 
     $container['slim']->render('json.tpl', array(
         'value' => $rs,
