@@ -22,7 +22,7 @@
         "blu3gui7ar/esmeralda": "dev-develop",
         "twig/twig": "~1.16",
         "monolog/monolog": "~1.10",
-        "pimple/pimple": "~3.0",
+        "pimple/pimple": "~2.1",
         "slim/slim": "~2.4.3",
         "slim/views": "~0.1.2",
         "flynsarmy/slim-monolog": "~0.1.0"
