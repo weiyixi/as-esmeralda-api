@@ -55,9 +55,7 @@ $slim->get("$prefix/:aid", function($uid, $aid) use ($container){
 		    die;
 		}
 	}
-    $slim->render('json.tpl', array(
-        'code' => 1
-    ));
+    $slim->render('json.tpl', array('code' => 1));
 });
 
 $slim->post("$prefix/:aid", function($uid, $aid) use ($container){
@@ -70,14 +68,33 @@ $slim->post("$prefix/:aid", function($uid, $aid) use ($container){
 	$slim->redirect("/checkout.php?act=checkout_payment_process&shipping_address_id=".$addressId);
 });
 
-$slim->delete("$prefix/:aid", function($uid, $aid) use ($container){
+$slim->delete("$prefix/:aid", function($uid, $aid) use ($container, $acceptJson){
 	$slim = $container['slim'];
 	$addressId = (int) $aid;
 	if ($addressId) {
 		$userId = getUserId($uid);
-		$container['user.address']->remove($userId, $addressId);
+		$rs = $container['user.address']->remove($userId, $addressId);
 	}
-	$slim->redirect("/checkout.php?act=checkout_shipping_address");
+	if ($acceptJson) {
+		$code = 0;
+		$msg = 'success';
+		if (!$rs) {
+			$code = 1;
+			$msg = 'error';			
+		}
+	    $slim->render('json.tpl',array(
+	    	'value' => array(
+				'code' => $code,
+				'msg' => $msg
+		    ),
+	        'json_format' => JSON_FORCE_OBJECT | JSON_PRETTY_PRINT,
+	        'APP_WEB_ROOT' => $container['APP_WEB_ROOT'],
+	        'PUBLIC_ROOT' => $container['PUBLIC_ROOT'],
+	    ));
+	    die;
+	} else {
+		$slim->redirect("/checkout.php?act=checkout_shipping_address");
+	}
 });
 
 $slim->post($prefix, function($uid) use ($container, $acceptJson){
