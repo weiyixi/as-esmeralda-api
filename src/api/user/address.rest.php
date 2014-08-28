@@ -23,6 +23,9 @@ $acceptJson = stripos($accept, 'json') ? true : false;
 
 function getUserId($uid){
     global $container;
+    if (!function_exists('ssession_status') || session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
     $userService = $container['user'];
     $userId = 0;
     if($uid == 'self'){
