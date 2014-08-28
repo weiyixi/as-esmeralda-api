@@ -55,7 +55,7 @@ $slim->get("$prefix/:aid", function($uid, $aid) use ($container){
 		    die;
 		}
 	}
-    $slim->render('json.tpl', array('code' => 1));
+    echo json_encode(array('code' => 1));
 });
 
 $slim->post("$prefix/:aid", function($uid, $aid) use ($container){
@@ -80,7 +80,7 @@ $slim->delete("$prefix/:aid", function($uid, $aid) use ($container, $acceptJson)
 		$msg = 'success';
 		if (!$rs) {
 			$code = 1;
-			$msg = 'error';			
+			$msg = 'error';
 		}
 	    $slim->render('json.tpl',array(
 	    	'value' => array(
@@ -129,7 +129,7 @@ $slim->post($prefix, function($uid) use ($container, $acceptJson){
 	        'json_format' => JSON_FORCE_OBJECT | JSON_PRETTY_PRINT,
 	        'APP_WEB_ROOT' => $container['APP_WEB_ROOT'],
 	        'PUBLIC_ROOT' => $container['PUBLIC_ROOT'],
-	    ));		
+	    ));
 	} else {
 		$slim->redirect("/checkout.php?act=checkout_payment_process");
 	}
