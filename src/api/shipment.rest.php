@@ -53,6 +53,7 @@ $container['slim']->get("$prefix/user/:uid", function($uid) use ($container){
         $product = $productService->getProduct($cartProduct->goods_id);
         $goods_in_cart[$key]['rec_id'] = $cartProduct->rec_id;
         $goods_in_cart[$key]['goods_id'] = $cartProduct->goods_id;
+        $goods_in_cart[$key]['cat_id'] = $product->cat_id;
         $goods_in_cart[$key]['goods_number'] = $cartProduct->goods_number;
         $goods_in_cart[$key]['styles'] = json_decode($cartProduct->styles, true);
         $goods_in_cart[$key]['shop_price'] = $product->shop_price;
