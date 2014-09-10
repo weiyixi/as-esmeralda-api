@@ -43,6 +43,7 @@ $container['slim']->get("$prefix/user/:uid", function($uid) use ($container){
     $cartService = $container['user.cart'];
     $productService = $container['product'];
     $lang = $app->request->get('lang');
+    $currencyName = $app->request->get('currencyName');
     $countryId = $app->request->get('country_id');
     $sessionId = getSessionId($app->request->get('sid'));
     $userId = getUserId($uid);
@@ -60,7 +61,8 @@ $container['slim']->get("$prefix/user/:uid", function($uid) use ($container){
         $goods_in_cart[$key]['market_price'] = $product->market_price;
     }
 
-    $shippingInfo = ShippingProcessor::getShippingInfo($goods_in_cart, $lang, $countryId);
+    $currency = $container['currency']->getCurrencyByName($currencyName);
+    $shippingInfo = ShippingProcessor::getShippingInfo($goods_in_cart, $lang, $currency, $countryId);
 
     $container['slim']->render('json.tpl', array(
         'value' => $shippingInfo,
