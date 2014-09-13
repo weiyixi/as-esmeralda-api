@@ -45,7 +45,7 @@ $container['slim']->get("$prefix/base/:ids/:domain", function($ids, $domain) use
     $ids = parseIds($ids);
     // limit 200
     if (count($ids) > 200) {
-        $ids = array_slice($ids, 0, 200);        
+        $ids = array_slice($ids, 0, 200);
     }
 
     $slim = $container['slim'];

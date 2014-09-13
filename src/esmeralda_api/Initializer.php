@@ -20,18 +20,18 @@ class SlimWrapper extends \Slim\Slim{
         $twig = $this->view->getInstance();
         $loader = $twig->getLoader();
 		if (false !== stripos($accept, 'htm') && $loader->exists($tpl.".htm")){
-            parent::render($tpl.".htm", $params);
+            parent::render($tpl.".htm", $params, $status);
             $resp = $this->response();
             $resp['Content-Type'] = 'text/html';
             return;
         }
 		if (false !== stripos($accept, 'json') && $loader->exists($tpl.".json")){
-            parent::render($tpl.".json", $params);
+            parent::render($tpl.".json", $params, $status);
             $resp = $this->response();
             $resp['Content-Type'] = 'application/json';
             return;
         }
-        parent::render($tpl.".json", $params);
+        parent::render($tpl.".json", $params, $status);
         $resp = $this->response();
         $resp['Content-Type'] = 'application/json';
         return;
