@@ -18,6 +18,9 @@ if(!empty($APP_FS_ROOT)){
     if(file_exists($APP_FS_ROOT.'src/php/includes/common.php')){
         require_once $APP_FS_ROOT.'src/php/includes/common.php';
     }
+    if (file_exists($APP_FS_ROOT.'src/php/includes/init.php')) {
+        include_once $APP_FS_ROOT.'src/php/includes/init.php';
+    }
 }else{
     $APP_FS_ROOT = dirname(__DIR__) . '/';
     $APP_WEB_ROOT = dirname($_SERVER['SCRIPT_NAME']);
