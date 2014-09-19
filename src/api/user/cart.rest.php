@@ -7,7 +7,7 @@ $prefix = '/apis/user/:uid/cart';
 
 function getSessionId($sid){
     if(empty($sid)){
-        if (session_status() !== PHP_SESSION_ACTIVE) {
+        if (function_exists('ssession_status') && session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
         $sessionId = session_id();
