@@ -19,8 +19,10 @@ function getSessionId($sid){
 }
 
 function getUserId($uid){
-    return $uid;
     global $container;
+    if (function_exists('ssession_status') && session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
     $userService = $container['user'];
     $userId = 0;
     if($uid == 'self'){
@@ -59,6 +61,7 @@ $container['slim']->get("$prefix/user/:uid", function($uid) use ($container){
         $goods_in_cart[$key]['styles'] = json_decode($cartProduct->styles, true);
         $goods_in_cart[$key]['shop_price'] = $product->shop_price;
         $goods_in_cart[$key]['market_price'] = $product->market_price;
+        $goods_in_cart[$key]['cat_id'] = $product->cat_id;
     }
 
     $currency = $container['currency']->getCurrencyByName($currencyName);
