@@ -28,7 +28,7 @@
         }
     ],
     "require": {
-        "blu3gui7ar/esmeralda": "v0.1.20140417",
+        "blu3gui7ar/esmeralda": "v0.1.20140716",
         "slim/slim": "2.*",
         "slim/views": "0.1.*",
         "twig/twig": "1.*",
