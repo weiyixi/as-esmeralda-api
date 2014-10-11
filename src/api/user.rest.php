@@ -1,14 +1,32 @@
 <?php
+$uri = $_SERVER['REQUEST_URI'];
+$subapi = preg_replace('/\/apis\/user\/([\d\w]+)\/(\w+).*/', '/user/$2.rest.php', $uri);
+if($subapi != $uri){
+    include __DIR__ . $subapi;
+    die;
+}
 
-include_once __DIR__ . '/../modules/lestore_common.php';
+include_once __DIR__ . '/../common.php';
 
 $prefix = '/apis/user';
-$container['user'] = function($c){
-    //return new UserService();
-};
 
-$container['slim']->get("$prefix/:id", function($id) use ($container){
-    //get user
+$container['slim']->get("$prefix/:uid", function($uid) use ($container){
+    $userService = $container['user'];
+    $user = null;
+    if($uid == 'self'){
+        if(isset($_SESSION['user_id'])){
+            $userId = $_SESSION['user_id'];
+            $user = $userService->getUser($id);
+        }
+    }else{
+        $user = $userService->getUserByUID($uid);
+    }
+    $container['slim']->render('json.tpl', array(
+        'value' => $user,
+        'json_format' => JSON_FORCE_OBJECT | JSON_PRETTY_PRINT,
+        'APP_WEB_ROOT' => $container['APP_WEB_ROOT'],
+        'PUBLIC_ROOT' => $container['PUBLIC_ROOT'],
+    ));
 });
 
 $container['slim']->post("$prefix", function() use ($container){
@@ -17,50 +35,6 @@ $container['slim']->post("$prefix", function() use ($container){
 
 $container['slim']->post("$prefix/:id", function($id) use ($container){
     //update user
-});
-
-$container['slim']->get("$prefix/:id/address", function($id) use ($container){
-    //get all user addresses
-});
-
-$container['slim']->get("$prefix/:id/address/:aid", function($id) use ($container){
-    //get user address
-});
-
-$container['slim']->post("$prefix/:id/address", function($id) use ($container){
-    //create user address
-});
-
-$container['slim']->post("$prefix/:id/address/:aid", function($id, $aid) use ($container){
-    //update user address
-});
-
-$container['slim']->get("$prefix/:id/favorite", function($id) use ($container){
-    //get all user favorite 
-});
-
-$container['slim']->post("$prefix/:id/favorite", function($id) use ($container){
-    //create user favorite 
-});
-
-$container['slim']->delete("$prefix/:id/favorite/:fid", function($id, $fid) use ($container){
-    //delete user favorite 
-});
-
-$container['slim']->get("$prefix/:id/history", function($id) use ($container){
-    //get user history 
-});
-
-$container['slim']->get("$prefix/:id/cart", function($id) use ($container){
-    //get user cart
-});
-
-$container['slim']->post("$prefix/:id/cart/:gid", function($id, $gid) use ($container){
-    //add|update goods to user cart
-});
-
-$container['slim']->delete("$prefix/:id/cart/:gid", function($id, $gid) use ($container){
-    //delete goods from user cart
 });
 
 $container['slim']->run();

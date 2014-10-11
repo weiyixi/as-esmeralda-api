@@ -24,16 +24,16 @@ function parseIds($param_ids){
     return $ids;
 }
 
-function getProducts($ids, $status) {
+function getProducts($ids, $status, $lang = null) {
     global $container;
 
     switch($status) {
         case 'any':
-            $products = $container['product']->getProducts($ids, null, -1, -1, -1);
+            $products = $container['product']->getProducts($ids, $lang, -1, -1, -1);
             break;
         case 'active':
         default:
-            $products = $container['product']->getProducts($ids, null);
+            $products = $container['product']->getProducts($ids, $lang);
             break;
     }
     return $products;
@@ -51,7 +51,8 @@ $container['slim']->get("$prefix/base/:ids/:domain", function($ids, $domain) use
     if(null == $status){
         $status = 'active';
     }
-    $products = getProducts($ids, $status);
+    $lang = $slim->request->params('lang');
+    $products = getProducts($ids, $status, $lang);
 
     $slim->render('json.tpl', array(
         'value' => $products,
