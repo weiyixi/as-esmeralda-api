@@ -6,10 +6,10 @@ use lestore_order\app\dao\OrderDao;
 use lestore_order\app\service\OrderService;
 
 $prefix = '/apis/order';
-$container['order'] = $container->share(function($c){
+$container['order'] = function($c){
     $dao = new OrderDao($c['db']);
     return new lestore_order\app\service\OrderService($dao);
-});
+};
 
 $container['slim']->get("$prefix/:sn", function($sn) use ($container){
     $container['slim']->render('order.tpl', array(

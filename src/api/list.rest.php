@@ -9,10 +9,10 @@ use lestore_product_list\app\service\DBDomainProductListService;
 $prefix = '/apis/list';
 const DEFAULT_PAGE_SIZE = 24;
 
-$container['list'] = $container->share(function($c){
+$container['list'] = function($c){
 	$dao = new ProductListDao($c['db']);
 	return new DBDomainProductListService($dao);
-});
+};
 
 $container['slim']->get("$prefix/:domain(/:offset(/:size))", 
 	function($domain, $offset=0, $size=DEFAULT_PAGE_SIZE) use ($container){
