@@ -94,11 +94,11 @@ class Initializer{
             Initializer::ensureDir($siteConf['api_log_dir']);
             $transport = \Swift_AWSTransport::newInstance($siteConf['AWS_ACCESS_KEY_ID'], $siteConf['AWS_SECRET_ACCESS_KEY']);
             $message = \Swift_Message::newInstance('esmeralda api occurs some problem.')->setFrom(array($siteConf['NOTICE_EMAIL']))->setTo(array($siteConf['ALARM_EMAIL']));
-            $handers = array(
+            $handlers = array(
                 new StreamHandler($siteConf['log_dir'].'/esmeralda-api-'.date('Y-m-d').'.log', $siteConf['log_level']),
                 new SwiftMailerHandler(\Swift_Mailer::newInstance($transport), $message, Logger::CRITICAL),
             );
-            return $handers;
+            return $handlers;
         };
 
         return $container;
