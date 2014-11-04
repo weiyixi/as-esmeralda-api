@@ -19,7 +19,7 @@
         }
     ],
     "require": {
-        "blu3gui7ar/esmeralda": "dev-develop",
+        "blu3gui7ar/esmeralda": "@dev",
         "twig/twig": "~1.16",
         "monolog/monolog": "~1.10",
         "pimple/pimple": "~2.1",
