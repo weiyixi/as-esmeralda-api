@@ -89,7 +89,7 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 
 	// insert goods style
 	$goodsStyleIds = array();
-	if (isset($_POST['goods_style']) && is_array($_POST['goods_style']) && !empty($skuIds)) {
+	if (isset($_POST['goods_style']) && is_array($_POST['goods_style'])) {
 		$orderWService->beginTransaction();
 		foreach ($_POST['goods_style'] as $oldRecId => $styleItems) {
 			// sku can not be empty
