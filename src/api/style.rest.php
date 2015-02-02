@@ -8,6 +8,10 @@ use esmeralda\style\DbStyleService;
 $prefix = '/apis/style';
 const DEFAULT_PAGE_SIZE = 24;
 
+function verifyToken($token) {
+    return $token == 'd41d8cd98f00b204e9800998ecf8427e';
+}
+
 /*
  Get all raw styles updated between specified times
  Hour and Minutes is optional
@@ -17,10 +21,17 @@ const DEFAULT_PAGE_SIZE = 24;
 $container['slim']->get("$prefix/:beginTime/:minStyleId(/:limit)",
     function($beginTime, $minStyleId, $limit=DEFAULT_PAGE_SIZE) use ($container){
 
+    // verify token
+    $token = $container['slim']->request->get('token');
+    if (!verifyToken($token)) {
+        echo 'Not Authorized.'; die;
+    }
+
     // use db style service, without cache
     $styleDao = new StyleDao($container);
     $styleService = new DbStyleService($styleDao);
 
+    // get all styles
     $beginTime = str_replace('_', ' ', $beginTime);
     $styleIds = $styleService->_getStyleIds(array(
         'begin' => $beginTime,
@@ -30,15 +41,10 @@ $container['slim']->get("$prefix/:beginTime/:minStyleId(/:limit)",
     $styleTree = $styleService->getByIds($styleIds);
     $styles = $styleTree->getAllNodes();
 
+    // append style name
     foreach ($styles as $sId => $style) {
-        if (!empty($styles[$style->parent_id])) {
-            $pStyle = $styles[$style->parent_id];
-            $style->oname = $pStyle->oname;
-        }
-    }
-    foreach ($styles as $sId => $style) {
-        if (!in_array($sId, $styleIds)) {
-            unset($styles[$sId]);
+        if (!empty($styles[$style->parent_id]->oname)) {
+            $style->oname = $styles[$style->parent_id]->oname;
         }
     }
 
