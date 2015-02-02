@@ -2,6 +2,9 @@
 
 include_once __DIR__ . '/../common.php';
 
+use esmeralda\style\StyleDao;
+use esmeralda\style\DbStyleService;
+
 $prefix = '/apis/style';
 const DEFAULT_PAGE_SIZE = 24;
 
@@ -14,13 +17,17 @@ const DEFAULT_PAGE_SIZE = 24;
 $container['slim']->get("$prefix/:beginTime/:minStyleId(/:limit)",
     function($beginTime, $minStyleId, $limit=DEFAULT_PAGE_SIZE) use ($container){
 
+    // use db style service, without cache
+    $styleDao = new StyleDao($container);
+    $styleService = new DbStyleService($styleDao);
+
     $beginTime = str_replace('_', ' ', $beginTime);
-    $styleIds = $container['style']->_getStyleIds(array(
+    $styleIds = $styleService->_getStyleIds(array(
         'begin' => $beginTime,
         'min_id' => $minStyleId,
         'limit' => $limit,
     ));
-    $styleTree = $container['style']->getByIds($styleIds);
+    $styleTree = $styleService->getByIds($styleIds);
     $styles = $styleTree->getAllNodes();
 
     foreach ($styles as $sId => $style) {
