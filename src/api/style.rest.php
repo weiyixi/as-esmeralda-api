@@ -31,6 +31,12 @@ $container['slim']->get("$prefix/:beginTime/:minStyleId(/:limit)",
     $styles = $styleTree->getAllNodes();
 
     foreach ($styles as $sId => $style) {
+        if (!empty($styles[$style->parent_id])) {
+            $pStyle = $styles[$style->parent_id];
+            $style->oname = $pStyle->oname;
+        }
+    }
+    foreach ($styles as $sId => $style) {
         if (!in_array($sId, $styleIds)) {
             unset($styles[$sId]);
         }
