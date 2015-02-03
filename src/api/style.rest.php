@@ -47,6 +47,12 @@ $container['slim']->get("$prefix/:beginTime/:minStyleId(/:limit)",
             $style->oname = $styles[$style->parent_id]->oname;
         }
     }
+    // remove invalid node
+    foreach ($styles as $sId => $style) {
+        if (!in_array($sId, $styleIds)) {
+            unset($styles[$sId]);
+        }
+    }
 
     $container['slim']->render('json.tpl', array(
         'value' => $styles,
