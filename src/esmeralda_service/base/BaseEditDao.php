@@ -23,7 +23,7 @@ class BaseEditDao extends BaseDao {
             $values
 EOSQL;
         try {
-            $pstmt = $this->db()->prepare($sql);
+            $pstmt = $this->dbw()->prepare($sql);
             $params = array();
             foreach ($data as $v) {
                 $params = array_merge($params, array_values($v));
@@ -38,7 +38,7 @@ EOSQL;
     }
 
     public function getLastInsertId() {
-        return $this->db()->lastInsertId();
+        return $this->dbw()->lastInsertId();
     }
 
     public function update($table, $data, $query = array()) {
@@ -63,7 +63,7 @@ EOSQL;
         }
 
         try {
-            $pstmt = $this->db()->prepare($sql);
+            $pstmt = $this->dbw()->prepare($sql);
             $params = array_values($data);
             if (!empty($query['params'])) {
                 $params = array_merge($params, array_values($query['params']));
@@ -78,13 +78,13 @@ EOSQL;
     }
 
     public function beginTransaction() {
-        return $this->db()->beginTransaction();
+        return $this->dbw()->beginTransaction();
     }
     public function rollBack() {
-        return $this->db()->rollBack();
+        return $this->dbw()->rollBack();
     }
     public function commit() {
-        return $this->db()->commit();
+        return $this->dbw()->commit();
     }
 
 } 
