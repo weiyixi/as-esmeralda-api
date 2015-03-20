@@ -1,12 +1,15 @@
 <?php namespace esmeralda_api;
 
+use esmeralda\base\Util;
 use esmeralda\user\address\AddressService;
 
 class PaymentUtil {
     public static function getValidPayments($paymentLang, $currencyCode, $countryCode, $paymentConfigLang = '') {
         global $container;
 
-        $countryCode = !empty($countryCode) ? $countryCode : 'US';
+        if(empty($countryCode)){
+            $countryCode = Util::conf('region.default.code', 'US');
+        }
         $payments = $container['payment']->getValidPayments($paymentLang, $countryCode, $currencyCode, $paymentConfigLang);
         if (empty($payments)) {
             return null;

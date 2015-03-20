@@ -73,7 +73,7 @@ $container['slim']->get("$prefix/styles/:ids", function($ids) use ($container){
     }
 
     $styleFeature = $container['feature']->getFeature('product-style', '1.0');
-    $styleInst = $container['feature']->getInstance($styleFeature->id, Util::conf('domain'), "style_common");
+    $styleInst = $container['feature']->getInstance($styleFeature->id, Util::conf('feature_domain'), "style_common");
     $config = json_decode($styleInst->config);
     $noStyleGoods = isset($config->noStyleGoods) ? $config->noStyleGoods : array();
     $ids = array_diff($ids, $noStyleGoods);
