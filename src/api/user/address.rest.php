@@ -13,9 +13,9 @@ $acceptJson = stripos($accept, 'json') ? true : false;
 // 	    $slim->render('json.tpl', array(
 // 	        'code' => -1,
 // 	        'url' => "login.php?back=".urlencode("checkout.php?act=checkout_payment_process")
-// 	    ));		
+// 	    ));
 // 	} else {
-// 		$slim->redirect("/login.php?back=".urlencode("cart.php"));		
+// 		$slim->redirect("/login.php?back=".urlencode("cart.php"));
 // 	}
 //     die;
 // }
