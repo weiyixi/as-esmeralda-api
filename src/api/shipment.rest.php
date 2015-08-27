@@ -62,6 +62,7 @@ $container['slim']->get("$prefix/user/:uid", function($uid) use ($container){
         $goods_in_cart[$key]['shop_price'] = $product->shop_price;
         $goods_in_cart[$key]['market_price'] = $product->market_price;
         $goods_in_cart[$key]['cat_id'] = $product->cat_id;
+        $goods_in_cart[$key]['last_update_time'] = $cartProduct->last_update_time;
     }
 
     $currency = $container['currency']->getCurrencyByName($currencyName);
