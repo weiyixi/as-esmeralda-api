@@ -25,7 +25,7 @@
         "pimple/pimple": "~2.1",
         "slim/slim": "~2.4.3",
         "slim/views": "~0.1.2",
-        "flynsarmy/slim-monolog": "~0.1.0"
+        "flynsarmy/slim-monolog": "~1.0.0"
     },
     "require-dev": {
         "phpunit/phpunit": "~4.1",
