@@ -30,7 +30,7 @@ $siteConf = array_merge($siteConf, array(
 
     'custom_size_wrap' => array(
         array(
-            'name' => 'shoulder_width',
+            'name' => 'shoulder_width',//TODO create page_common_shoulder_width
             'inchRange' => range(9, 28, 0.5),
             'cmRange' => range(23, 69, 1),
         ),

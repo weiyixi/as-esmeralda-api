@@ -8,45 +8,32 @@
             "email": "blu3gui7ar@gmail.com"
         }
     ],
-    "urepo":[
-        {
-            "packagist" : false
-        },
-        {
-            "type": "vcs",
-            "url":  "https://g.pupugao.com/v5/esmeralda.git"
-        }
-    ],
     "repositories": [
         {
-            "type": "composer",
-            "url":  "http://deployer-test.opvalue.com"
+            "type": "vcs",
+            "url":  "https://g.pupugao.com/v5/esmeralda.git"
         },
         {
             "type": "vcs",
-            "url":  "https://g.pupugao.com/v5/esmeralda.git"
+            "url": "https://github.com/blu3gui7ar/Slim-Monolog.git"
         }
     ],
     "require": {
-        "blu3gui7ar/esmeralda": "v0.1.20141003",
-        "slim/slim": "2.*",
-        "slim/views": "0.1.*",
-        "twig/twig": "1.*",
-        "monolog/monolog": "1.7.*",
-        "flynsarmy/slim-monolog": "0.1.*",
-        "pimple/pimple": "1.1.*",
-        "facebook/xhprof": "dev-master",
-        "swiftmailer/swiftmailer": "@stable",
-        "jmhobbs/swiftmailer-transport-aws-ses": "@stable"
+        "blu3gui7ar/esmeralda": "@dev",
+        "twig/twig": "~1.16",
+        "monolog/monolog": "~1.10",
+        "pimple/pimple": "~2.1",
+        "slim/slim": "~2.4.3",
+        "slim/views": "~0.1.2",
+        "flynsarmy/slim-monolog": "~1.0.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "3.7.*",
+        "phpunit/phpunit": "~4.1",
         "phpunit/php-invoker": "*"
     },
     "autoload": {
-        "psr-0" : {
-            "esmeralda_api\\" : "src/",
-            "esmeralda_service\\" : "src/"
+        "psr-4" : {
+            "esmeralda_api\\" : "src/esmeralda_api"
         }
     },
     "archive": {

@@ -18,13 +18,14 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 	$jsonTpl = 'json.tpl';
 	$jsonFormat = JSON_FORCE_OBJECT | JSON_PRETTY_PRINT;
 
-	if (!isset($_POST['order_info']) || !is_array($_POST['order_info'])) {
+    $postOrder = !empty($_POST['order']) ? json_decode($_POST['order'], true) : $_POST;
+	if (!isset($postOrder['order_info']) || !is_array($postOrder['order_info'])) {
 		$response['msg'] = "missing order info.";
 		$logger->error($response['msg']);
 	    $slim->render($jsonTpl, array('value' => $response, 'json_format' => $jsonFormat));
 		die;
 	}
-	if (!isset($_POST['order_goods']) || !is_array($_POST['order_goods'])) {
+	if (!isset($postOrder['order_goods']) || !is_array($postOrder['order_goods'])) {
 		$response['msg'] = "missing goods info.";
 		$logger->error($response['msg']);
 	    $slim->render($jsonTpl, array('value' => $response, 'json_format' => $jsonFormat));
@@ -47,13 +48,13 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 			break;
 		}
 	} while ($try < 10);
-	$_POST['order_info']['order_sn'] = $orderSn;
+	$postOrder['order_info']['order_sn'] = $orderSn;
 
 	// insert goods sku items
 	$skuIds = array();
-	if (isset($_POST['goods_sku']) && is_array($_POST['goods_sku'])) {
+	if (isset($postOrder['goods_sku']) && is_array($postOrder['goods_sku'])) {
 		$orderWService->beginTransaction();
-		foreach ($_POST['goods_sku'] as $oldRecId=>$skuItems) {
+		foreach ($postOrder['goods_sku'] as $oldRecId=>$skuItems) {
 			$skuId = $orderService->checkSkuIdExists($skuItems);
 			if (!$skuId) {
 				if (!$orderWService->insert('goods_sku', $skuItems)) {
@@ -78,7 +79,7 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 
 	// create sku
 	$skus = array();
-	foreach ($_POST['order_goods'] as $oldRecId=>$orderGoods) {
+	foreach ($postOrder['order_goods'] as $oldRecId=>$orderGoods) {
 		$sku = $orderGoods['sku'];
 //		$sku = preg_replace('/(\d*)(g\d+)([a-fh-z]?)/', '\1g'.$orderGoods['goods_id'].'\3', $sku);
 		if (isset($skuIds[$oldRecId])) {
@@ -89,9 +90,9 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 
 	// insert goods style
 	$goodsStyleIds = array();
-	if (isset($_POST['goods_style']) && is_array($_POST['goods_style']) && !empty($skuIds)) {
+	if (isset($postOrder['goods_style']) && is_array($postOrder['goods_style'])) {
 		$orderWService->beginTransaction();
-		foreach ($_POST['goods_style'] as $oldRecId => $styleItems) {
+		foreach ($postOrder['goods_style'] as $oldRecId => $styleItems) {
 			// sku can not be empty
 			if (!isset($skus[$oldRecId]) || empty($skus[$oldRecId])) {
 				continue;
@@ -102,7 +103,7 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 			$styleItems['sku'] = $skus[$oldRecId];
 			$gStyleId = $orderService->checkGStyleIdExists($styleItems);
 			if (!$gStyleId) {
-				$styleItems['style_price'] = $_POST['order_goods'][$oldRecId]['shop_price'];
+				$styleItems['style_price'] = $postOrder['order_goods'][$oldRecId]['shop_price'];
 				if (!$orderWService->insert('goods_style', $styleItems)) {
 					$orderWService->rollBack();
 					$response['msg'] = "insert goods style failed.";
@@ -125,7 +126,7 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 
 	// insert order_info
 	$orderWService->beginTransaction();
-	$affectedRows = $orderWService->insert('order_info', $_POST['order_info']);
+	$affectedRows = $orderWService->insert('order_info', $postOrder['order_info']);
 	if (!$affectedRows) {
 		$response['msg'] = "insert order info failed.";
 		$logger->error($response['msg']);
@@ -135,7 +136,7 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 	$orderId = $orderWService->getLastInsertId();
 	// insert order_goods
 	$recIds = array();
-	foreach ($_POST['order_goods'] as $oldRecId=>$orderGoods) {
+	foreach ($postOrder['order_goods'] as $oldRecId=>$orderGoods) {
 		$orderGoods['order_id'] = $orderId;
 		$orderGoods['goods_style_id'] = $goodsStyleIds[$oldRecId];
 		$orderGoods['sku'] = $skus[$oldRecId];
@@ -152,14 +153,14 @@ $container['slim']->post($prefix.'/post/:domain', function ($domain) use ($conta
 		$recIds[$oldRecId] = $newRecId;
 	}
 	// insert order_extension
-	if (isset($_POST['order_extension']) && !empty($_POST['order_extension'])) {
-		array_push($_POST['order_extension'], array(
+	if (isset($postOrder['order_extension']) && !empty($postOrder['order_extension'])) {
+		array_push($postOrder['order_extension'], array(
 			'ext_name' => 'newRecIds',
 			'ext_value' => json_encode($recIds),
 			'order_id' => $orderId,
 		));
-		$_POST['order_extension'] = array_map(function(&$row) use ($orderId){$row['order_id'] = $orderId; return $row;}, $_POST['order_extension']);
-		$affectedRows = $orderWService->insert('order_extension', $_POST['order_extension']);
+		$postOrder['order_extension'] = array_map(function(&$row) use ($orderId){$row['order_id'] = $orderId; return $row;}, $postOrder['order_extension']);
+		$affectedRows = $orderWService->insert('order_extension', $postOrder['order_extension']);
 		if (!$affectedRows) {
 			$orderWService->rollBack();
 			$response['msg'] = "insert order extension failed.";

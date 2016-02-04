@@ -1,9 +1,10 @@
 <?php
 include_once __DIR__ . '/../common.php';
 
-$prefix = '/apis/product/:domain';
+$prefix = '/apis/product';
 
-$container['slim']->get("$prefix/:id", function($domain, $id) use ($container){
+//{{{ GET: $prefix/:id
+$container['slim']->get("$prefix/:id", function($id) use ($container){
     $slim = $container['slim'];
     $status = $slim->request->params('status');
     if(null == $status){
@@ -25,8 +26,30 @@ $container['slim']->get("$prefix/:id", function($domain, $id) use ($container){
         'PUBLIC_ROOT' => $container['PUBLIC_ROOT'],
     ));
 });
-
-$container['slim']->get("$prefix/:id/detail", function($domain, $id) use ($container){
+//}}}
+//{{{ GET: $prefix/:id/styles
+$container['slim']->get("$prefix/:id/styles", function($id) use ($container){
+    $slim = $container['slim'];
+    $styles = $container['product']->getStyles($id);
+    if(empty($styles)){
+        $slim->render('json.tpl', array(
+            'value' => array('code' => 1, 'msg' => "style for product $id not found"),
+            'json_format' => JSON_FORCE_OBJECT | JSON_PRETTY_PRINT,
+        ),
+        404);
+    }else{
+        if(!empty($styles['tree'])){
+            $styles['tree'] = $styles['tree']->raw();
+        }
+        $slim->render('json.tpl', array(
+            'value' => $styles,
+            'json_format' => JSON_FORCE_OBJECT | JSON_PRETTY_PRINT,
+        ));
+    }
+});
+//}}}
+//{{{ GET: $prefix/:id/detail
+$container['slim']->get("$prefix/:id/detail", function($id) use ($container){
     $detail = $container['product']->getProductDetail($id);
     $container['slim']->render('json.tpl', array(
         'value' => $detail,
@@ -35,14 +58,15 @@ $container['slim']->get("$prefix/:id/detail", function($domain, $id) use ($conta
         'PUBLIC_ROOT' => $container['PUBLIC_ROOT'],
     ));
 });
+//}}}
 
 // $container['slim']->get("$prefix/:id/nls(/:lang)", function($domain, $id, $lang = 'en') use ($container){
 // 	$timeStart = microtime(true);
 // 	$container['product']->setDomain($domain);
-	
+
 // 	$cache = ResponseCache::getCache();
 // 	$cacheKey = $container['slim']->request()->getPath();
-	
+
 // 	if($cache->contains($cacheKey)){
 // 		$json = $cache->fetch($cacheKey);
 // 		$container['slim']->render('json.tpl', array(
@@ -67,7 +91,7 @@ $container['slim']->get("$prefix/:id/detail", function($domain, $id) use ($conta
 // 			$nls = $container['product']->getProductsNlsByIds($ids, $lang);
 // 			$tagNls = $container['product']->getTagsNlsByIds($ids, $lang);
 // 		}
-		
+
 // 		// get attribute
 // 		$aids = array();
 // 		foreach ($products as $product){
@@ -80,7 +104,7 @@ $container['slim']->get("$prefix/:id/detail", function($domain, $id) use ($conta
 // 			$aids = array_unique($aids);
 // 		}
 // 		$attrNls = $container['product']->getAttributesNls($aids);
-		
+
 // 		// get styles
 // 		$sids = array();
 // 		foreach ($products as $product){
@@ -94,16 +118,16 @@ $container['slim']->get("$prefix/:id/detail", function($domain, $id) use ($conta
 // 		}
 // 		$sids = array_values(array_unique($sids));
 // 		$styleNls = $container['product']->getStylesNls($sids);
-		
+
 // 		$langId = 1;
 // 		$attrNl = $attrNls[$langId];
 // 		$styleNl = $styleNls[$langId];
-		
+
 // 		// nlize
 // 		foreach ($products as $product){
 // 			//nlize product base info
 // 			$product = $container['product']->nlize($product, $nls[$langId]);
-				
+
 // 			// nlize product attributes
 // 			$attributes = array();
 // 			foreach ($product->attributes as $key => $values){
@@ -115,7 +139,7 @@ $container['slim']->get("$prefix/:id/detail", function($domain, $id) use ($conta
 // 				$attributes[$key]['values'] = $attrValues;
 // 			}
 // 			$product->attributes = $attributes;
-				
+
 // 			// nlize product styles
 // 			$styles = array();
 // 			foreach ($product->styles as $key => $values){
@@ -128,9 +152,9 @@ $container['slim']->get("$prefix/:id/detail", function($domain, $id) use ($conta
 // 			}
 // 			$product->styles = $styles;
 // 		}
-		
+
 // 		echo json_encode($products);
-		
+
 // 		$container['slim']->render('product_nls.tpl', array(
 // 				'service' => $container['product'],
 // 				'nls' => $nls,

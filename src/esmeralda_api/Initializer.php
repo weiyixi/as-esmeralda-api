@@ -20,18 +20,18 @@ class SlimWrapper extends \Slim\Slim{
         $twig = $this->view->getInstance();
         $loader = $twig->getLoader();
 		if (false !== stripos($accept, 'htm') && $loader->exists($tpl.".htm")){
-            parent::render($tpl.".htm", $params);
+            parent::render($tpl.".htm", $params, $status);
             $resp = $this->response();
             $resp['Content-Type'] = 'text/html';
             return;
         }
 		if (false !== stripos($accept, 'json') && $loader->exists($tpl.".json")){
-            parent::render($tpl.".json", $params);
+            parent::render($tpl.".json", $params, $status);
             $resp = $this->response();
             $resp['Content-Type'] = 'application/json';
             return;
         }
-        parent::render($tpl.".json", $params);
+        parent::render($tpl.".json", $params, $status);
         $resp = $this->response();
         $resp['Content-Type'] = 'application/json';
         return;
@@ -46,7 +46,7 @@ class Initializer{
 
     public function initWeb($container){
         $t = $this;
-        $container['tplengine'] = $container->share(function($c) use ($t){
+        $container['tplengine'] = function($c) use ($t){
             $siteConf = $c['siteConf'];
             $twig = new \Slim\Views\Twig();
             $twig->twigTemplateDirs = $t->tplPath();
@@ -59,15 +59,15 @@ class Initializer{
                 new \Twig_Extension_Debug(),
             );
             return $twig;
-        });
+        };
 
-        $container['slim_logger'] = $container->share(function($c){
+        $container['slim_logger'] = function($c){
             return new \Flynsarmy\SlimMonolog\Log\MonologWriter(array(
                 'handlers' => $c['log_handlers'],
             ));
-        });
+        };
 
-        $container['slim'] = $container->share(function($c){
+        $container['slim'] = function($c){
             $siteConf = $c['siteConf'];
             \Slim\Route::setDefaultConditions(array(
                 'lang' => '[a-z]{2}'
@@ -80,13 +80,13 @@ class Initializer{
                 'debug' => isset($siteConf['slim.debug']) ? $siteConf['slim.debug'] : false,
                 'view' => $c['tplengine'],
             ));
-        });
+        };
 
         return $container;
     }
 
     public function initBase($container){
-        $container['api_log_handlers'] = $container->share(function($c){
+        $container['api_log_handlers'] = function($c){
             $siteConf = $c['siteConf'];
             if(!isset($siteConf['api_log_dir'])){
                 $siteConf['api_log_dir'] = '/var/log/esmeralda-api';
@@ -94,27 +94,27 @@ class Initializer{
             Initializer::ensureDir($siteConf['api_log_dir']);
             $transport = \Swift_AWSTransport::newInstance($siteConf['AWS_ACCESS_KEY_ID'], $siteConf['AWS_SECRET_ACCESS_KEY']);
             $message = \Swift_Message::newInstance('esmeralda api occurs some problem.')->setFrom(array($siteConf['NOTICE_EMAIL']))->setTo(array($siteConf['ALARM_EMAIL']));
-            $handers = array(
+            $handlers = array(
                 new StreamHandler($siteConf['log_dir'].'/esmeralda-api-'.date('Y-m-d').'.log', $siteConf['log_level']),
                 new SwiftMailerHandler(\Swift_Mailer::newInstance($transport), $message, Logger::CRITICAL),
             );
-            return $handers;
-        });
+            return $handlers;
+        };
 
         return $container;
     }
 
     public function initServices($container){
-        $container['order'] = $container->share(function($c){
+        $container['order'] = function($c){
             $siteConf = $c['siteConf'];
             $dao = new OrderDao($c);
             return new DBOrderService($dao, $siteConf['domain']);
-        });
-        $container['orderW'] = $container->share(function ($c) {
+        };
+        $container['orderW'] = function ($c) {
             $siteConf = $c['siteConf'];
             $editDao = new BaseEditDao($c);
             return new DbOrderWService($editDao, $siteConf['domain']);
-        });
+        };
 
         return $container;
     }
