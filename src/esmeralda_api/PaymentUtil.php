@@ -33,8 +33,13 @@ class PaymentUtil {
                 }
             }
 
-            $realTimeBankPaymentId = 159;
-            $realTimeBankPayment = isset($payments[$realTimeBankPaymentId]) ? $payments[$realTimeBankPaymentId] : null;
+            $realTimeBankConfig = Util::conf('realTimeBank');
+            if (!isset($realTimeBankConfig)) {
+                return $payments;
+            }
+
+            $realTimeBankId = 159;
+            $realTimeBankPayment = isset($payments[$realTimeBankId]) ? $payments[$realTimeBankId] : null;
             if (!empty($realTimeBankPayment)) {
                 $billingAddressList = $container['user.address']->getByType($userId, AddressService::TYPE_BILLING);
                 $shippingAddressList = $container['user.address']->getByType($userId, AddressService::TYPE_SHIPPING);
@@ -44,13 +49,17 @@ class PaymentUtil {
                         $billingAddressCountry = $container['region']->getRegion($billingAddress['country']);
                         $billingAddressPayments = $container['payment']->getValidPayments($paymentLang, $billingAddressCountry->region_code, $currencyCode, $paymentConfigLang);
 
-                        // 判断是否显示real time bank支付
-                        $allowedEURAddress = array('DE', 'NL', 'AT', 'BE');
-                        $notRealTimeBankAllowed = in_array(strtoupper($billingAddressCountry->region_code), $allowedEURAddress) ? false : true;
-
                         foreach ($shippingAddressList as $shippingAddress) {
-                            if (!isset($billingAddressPayments[$realTimeBankPaymentId]) || (strtoupper($shippingAddress['country_code']) == 'GB' && strtoupper($billingAddressCountry->region_code) != 'GB' && strtoupper($currencyCode) == 'GBP') || (strtoupper($shippingAddress['country_code']) == 'CH' && strtoupper($billingAddressCountry->region_code) != 'CH' && strtoupper($currencyCode) == 'CHF') || (in_array(strtoupper($shippingAddress['country_code']), $allowedEURAddress) && $notRealTimeBankAllowed && strtoupper($currencyCode) == 'EUR')) {
-                                unset($payments[$realTimeBankPaymentId]);
+                            if (isset($billingAddressPayments[$realTimeBankId]))
+                                continue;
+
+                            foreach ($realTimeBankConfig as $config) {
+                                if (in_array(strtoupper($shippingAddress['country_code']), $config[0]) &&
+                                    !in_array(strtoupper($billingAddressCountry->region_code), $config[0]) &&
+                                    strtoupper($currencyCode) == $config[1]
+                                ) {
+                                    unset($payments[$realTimeBankId]);
+                                }
                             }
                         }
                     }
