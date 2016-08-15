@@ -32,6 +32,39 @@ class PaymentUtil {
                     }
                 }
             }
+
+            $realTimeBankConfig = Util::conf('realTimeBank');
+            if (!isset($realTimeBankConfig)) {
+                return $payments;
+            }
+
+            $realTimeBankId = 159;
+            $realTimeBankPayment = isset($payments[$realTimeBankId]) ? $payments[$realTimeBankId] : null;
+            if (!empty($realTimeBankPayment)) {
+                $billingAddressList = $container['user.address']->getByType($userId, AddressService::TYPE_BILLING);
+                $shippingAddressList = $container['user.address']->getByType($userId, AddressService::TYPE_SHIPPING);
+                if (!empty($billingAddressList) && is_array($billingAddressList)) {
+                    $billingAddress = reset($billingAddressList);
+                    if (!empty($billingAddress['country'])) {
+                        $billingAddressCountry = $container['region']->getRegion($billingAddress['country']);
+                        $billingAddressPayments = $container['payment']->getValidPayments($paymentLang, $billingAddressCountry->region_code, $currencyCode, $paymentConfigLang);
+
+                        foreach ($shippingAddressList as $shippingAddress) {
+                            if (isset($billingAddressPayments[$realTimeBankId]))
+                                continue;
+
+                            foreach ($realTimeBankConfig as $config) {
+                                if (in_array(strtoupper($shippingAddress['country_code']), $config[0]) &&
+                                    !in_array(strtoupper($billingAddressCountry->region_code), $config[0]) &&
+                                    strtoupper($currencyCode) == $config[1]
+                                ) {
+                                    unset($payments[$realTimeBankId]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         return $payments;
