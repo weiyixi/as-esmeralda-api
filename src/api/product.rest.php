@@ -1,6 +1,9 @@
 <?php
 include_once __DIR__ . '/../common.php';
 
+use esmeralda\user\order\StyleProcessor;
+use esmeralda\base\LogFactory;
+
 $prefix = '/apis/product';
 
 //{{{ GET: $prefix/:id
@@ -59,6 +62,67 @@ $container['slim']->get("$prefix/:id/detail", function($id) use ($container){
     ));
 });
 //}}}
+
+$container['slim']->post("$prefix/catid/:cid/goodsid/:gid/getSkuByStyles", function($cid,$gid) use($container){
+
+    $retData = array('retCode' => '-1', 'retMsg' => '', 'retRes' => array());
+    do{
+
+        $request = $container['slim']->request();
+        $requestJson = $request->getBody();
+        $decodeResult = json_decode($requestJson, true);
+        $requestData = $decodeResult;
+
+        if(!isset($requestData)){
+            $retData['retMsg'] = '不存在商品属性数据！';
+            break;
+        }
+
+        $styleNameArr = array_keys($requestData);
+        $i = 0;
+        $tmpArr = array();
+        $stylesArr = array();
+        getStylesRecursively($styleNameArr, $requestData, $i, $tmpArr, $stylesArr);
+
+        foreach($stylesArr as &$styleArr) {
+            $selectStyle = array();
+            $selectStyle['select'] = $styleArr;
+            $styleP = new StyleProcessor($cid, $gid, $selectStyle,
+                0, 0);
+            $goodsStyles = $styleP->process(true);
+            $styleArr['sku'] = $goodsStyles['sku'];
+        }
+        $retData['retCode'] = '1';
+        $retData['retMsg'] = '查询成功';
+        $retData['retRes'] = $stylesArr;
+
+    }while(false);
+
+    $container['slim']->render('json.tpl', array(
+        'value' => $retData,
+        'json_format' => JSON_FORCE_OBJECT | JSON_PRETTY_PRINT,
+        'APP_WEB_ROOT' => $container['APP_WEB_ROOT'],
+        'PUBLIC_ROOT' => $container['PUBLIC_ROOT'],
+    ));
+});
+
+function getStylesRecursively($styleNameArr, $requestData, $i, $tmpArr, &$stylesArr) {
+    if(isset($styleNameArr[$i]) && isset($requestData[$styleNameArr[$i]])) {
+        foreach($requestData[$styleNameArr[$i]] as $styleValue) {
+            if($styleNameArr[$i] == 'Heel Type') {
+                $styleName = 'heel_type';
+            }else {
+                $styleName = strtolower($styleNameArr[$i]);
+            }
+
+            $tmpArr[$styleName] = $styleValue;
+            getStylesRecursively($styleNameArr, $requestData, $i+1, $tmpArr, $stylesArr);
+            unset($tmpArr[$styleName]);
+        }
+    }else {
+        $stylesArr[] = $tmpArr;
+    }
+}
 
 // $container['slim']->get("$prefix/:id/nls(/:lang)", function($domain, $id, $lang = 'en') use ($container){
 // 	$timeStart = microtime(true);
