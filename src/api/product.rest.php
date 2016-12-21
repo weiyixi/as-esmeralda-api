@@ -109,12 +109,7 @@ $container['slim']->post("$prefix/catid/:cid/goodsid/:gid/getSkuByStyles", funct
 function getStylesRecursively($styleNameArr, $requestData, $i, $tmpArr, &$stylesArr) {
     if(isset($styleNameArr[$i]) && isset($requestData[$styleNameArr[$i]])) {
         foreach($requestData[$styleNameArr[$i]] as $styleValue) {
-            if($styleNameArr[$i] == 'Heel Type') {
-                $styleName = 'heel_type';
-            }else {
-                $styleName = strtolower($styleNameArr[$i]);
-            }
-
+            $styleName = str_replace(" ","_",strtolower($styleNameArr[$i]));
             $tmpArr[$styleName] = $styleValue;
             getStylesRecursively($styleNameArr, $requestData, $i+1, $tmpArr, $stylesArr);
             unset($tmpArr[$styleName]);
