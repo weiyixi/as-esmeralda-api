@@ -2,10 +2,11 @@
 
 use esmeralda\base\Util;
 use esmeralda\user\address\AddressService;
+use lestore\util\Legacy;
 
 class PaymentUtil {
     public static function getValidPayments($paymentLang, $currencyCode, $countryCode, $paymentConfigLang = '') {
-        global $container;
+        global $container, $IMG_PATH;
 
         if(empty($countryCode)){
             $countryCode = Util::conf('region.default.code', 'US');
@@ -13,6 +14,9 @@ class PaymentUtil {
         $payments = $container['payment']->getValidPayments($paymentLang, $countryCode, $currencyCode, $paymentConfigLang);
         if (empty($payments)) {
             return null;
+        }
+        foreach ($payments as $payment) {
+            $payment->payment_desc = Legacy::run_lang_var($payment->payment_desc, array('IMG_PATH' => $IMG_PATH));
         }
 
         $userId = isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null;
