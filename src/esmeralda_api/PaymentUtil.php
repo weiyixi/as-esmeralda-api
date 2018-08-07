@@ -3,6 +3,7 @@
 use esmeralda\base\Util;
 use esmeralda\user\address\AddressService;
 use lestore\util\Legacy;
+use lestore\util\Helper;
 
 class PaymentUtil {
     public static function getValidPayments($paymentLang, $currencyCode, $countryCode, $paymentConfigLang = '') {
@@ -15,8 +16,23 @@ class PaymentUtil {
         if (empty($payments)) {
             return null;
         }
+
+        $dotpayPaymentId = 197;
+        if (isset($payments[$dotpayPaymentId]) && strtolower($countryCode) == 'cz' && $currencyCode == 'CZK') {
+            $payment_methods_dotpay_name = Helper::nl('page_common_payment_methods_dotpay_name');
+            if (!empty($payment_methods_dotpay_name)) {
+                $payments[$dotpayPaymentId]->payment_name = $payment_methods_dotpay_name;
+            }
+            $payment_methods_dotpay_desc = Helper::nl('page_common_payment_methods_dotpay_desc');
+            if (!empty($payment_methods_dotpay_desc)) {
+                $payments[$dotpayPaymentId]->payment_desc = $payment_methods_dotpay_desc;
+            }
+            $payments[$dotpayPaymentId]->useTrustPayIcon = 1;
+        }
+
         foreach ($payments as $payment) {
             $payment->payment_desc = Legacy::run_lang_var($payment->payment_desc, array('IMG_PATH' => $IMG_PATH));
+            $payment->useTrustPayIcon = isset($payment->useTrustPayIcon) ? $payment->useTrustPayIcon : 0;
         }
 
         $userId = isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null;
