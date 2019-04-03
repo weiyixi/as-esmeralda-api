@@ -31,7 +31,12 @@ class PaymentUtil {
         }
 
         foreach ($payments as $payment) {
-            $payment->payment_desc = Legacy::run_lang_var($payment->payment_desc, array('IMG_PATH' => $IMG_PATH));
+            $descDisabledPayment = Util::conf('desc_disabled_payment', array());
+            if(in_array($payment->payment_id, $descDisabledPayment)) {
+                $payment->payment_desc = '';
+            } else {
+                $payment->payment_desc = Legacy::run_lang_var($payment->payment_desc, array('IMG_PATH' => $IMG_PATH));
+            }
             $payment->useTrustPayIcon = isset($payment->useTrustPayIcon) ? $payment->useTrustPayIcon : 0;
         }
 
