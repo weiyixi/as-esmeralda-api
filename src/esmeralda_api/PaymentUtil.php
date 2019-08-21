@@ -6,6 +6,26 @@ use lestore\util\Legacy;
 use lestore\util\Helper;
 
 class PaymentUtil {
+    /**
+     * @var int
+     */
+    const GOOGLE_PAY_ID = 235;
+
+    /**
+     * @var int
+     */
+    const APPLE_PAY_ID = 190;
+
+    /**
+     * @var int
+     */
+    const IOS_MIN_VERSION = 25;
+
+    /**
+     * @var int
+     */
+    const ANDROID_MIN_VERSION = '2.5.0';
+
     public static function getValidPayments($paymentLang, $currencyCode, $countryCode, $paymentConfigLang = '') {
         global $container, $IMG_PATH;
 
@@ -91,7 +111,34 @@ class PaymentUtil {
                 }
             }
         }
+        return  self::filterPayment($payments);
+    }
 
+    /**
+     * 根据客户端信息格式化google pay /apple pay
+     * @param $payments
+     * @return mixed
+     */
+    private static function filterPayment($payments)
+    {
+        $isApp = Util::conf('isApp', 0);
+        global $web_container;
+        if (!$isApp || (!empty($web_container['globals']['IOS_VERSION']) && $web_container['globals']['IOS_VERSION'] < self::IOS_MIN_VERSION) || (!empty($web_container['globals']['ANDROID_VERSION']) && -1 === version_compare($web_container['globals']['ANDROID_VERSION'], self::ANDROID_MIN_VERSION))) {
+            return self::getUnTokenPayments($payments);
+        }
+        $isIos = isset($web_container['globals']['IOS_VERSION']) && !empty($web_container['globals']['IOS_VERSION']);
+        $unValidPaymentId = $isIos ? self::GOOGLE_PAY_ID : self::APPLE_PAY_ID;
+        unset($payments[$unValidPaymentId]);
+        return $payments;
+    }
+
+    /**
+     * @param $payments
+     * @return mixed
+     */
+    private static function getUnTokenPayments($payments)
+    {
+        unset($payments[self::APPLE_PAY_ID], $payments[self::GOOGLE_PAY_ID]);
         return $payments;
     }
 }
