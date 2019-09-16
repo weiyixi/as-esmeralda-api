@@ -19,6 +19,11 @@ class PaymentUtil {
     /**
      * @var int
      */
+    const COD_PAY_ID = 181;
+
+    /**
+     * @var int
+     */
     const IOS_MIN_VERSION = 25;
 
     /**
@@ -138,7 +143,7 @@ class PaymentUtil {
      */
     private static function getUnTokenPayments($payments)
     {
-        unset($payments[self::APPLE_PAY_ID], $payments[self::GOOGLE_PAY_ID]);
+        unset($payments[self::APPLE_PAY_ID], $payments[self::GOOGLE_PAY_ID], $payments[self::COD_PAY_ID]);
         return $payments;
     }
 }
