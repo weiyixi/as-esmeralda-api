@@ -4,6 +4,7 @@ namespace esmeralda_service\order;
 use esmeralda\base\BaseDao;
 use esmeralda\base\LogFactory;
 use esmeralda\base\NotSupportedException;
+use esmeralda\base\RpcFactory;
 
 class OrderDao extends BaseDao{
 
@@ -12,6 +13,16 @@ class OrderDao extends BaseDao{
     }
 
     public function getOrderInfo($orderSn, $userId = null){
+        // 通过rpc获取数据
+        $rpcRet = RpcFactory::factory('order')->callDao(
+            'App\Model\Dao\OrderDao', 
+            'getOrderInfo', 
+            [$orderSn, $userId]
+        );
+        if ($rpcRet['code'] == RpcFactory::CODE_SUCCESS) {
+            return $rpcRet['data'];
+        }
+
         $sql = <<<EOSQL
             /* OrderDao.getOrderInfo */
             SELECT *
@@ -45,6 +56,16 @@ EOSQL;
     }
 
     public function getOrderGoods($orderIds = null, $sku = null){
+        // 通过rpc获取数据
+        $rpcRet = RpcFactory::factory('order')->callDao(
+            'App\Model\Dao\OrderDao', 
+            'getOrderGoods', 
+            [$orderIds, $sku]
+        );
+        if ($rpcRet['code'] == RpcFactory::CODE_SUCCESS) {
+            return $rpcRet['data'];
+        }
+
         $where = '';
         if(null != $orderIds){
             $idsSelector = $this->idsSelector($orderIds);
@@ -94,6 +115,16 @@ EOSQL;
     }
 
     public function getOrderGoodsByIds($recIds) {
+        // 通过rpc获取数据
+        $rpcRet = RpcFactory::factory('order')->callDao(
+            'App\Model\Dao\OrderDao', 
+            'getOrderGoodsByIds', 
+            [$recIds]
+        );
+        if ($rpcRet['code'] == RpcFactory::CODE_SUCCESS) {
+            return $rpcRet['data'];
+        }
+
         $idsSelector = $this->idsSelector($recIds);
         if (is_null($idsSelector)) {
             return array();
@@ -125,6 +156,16 @@ EOSQL;
     }
 
     public function getOrderExtension($orderId){
+        // 通过rpc获取数据
+        $rpcRet = RpcFactory::factory('order')->callDao(
+            'App\Model\Dao\OrderDao', 
+            'getOrderExtension', 
+            [intval($orderId)]
+        );
+        if ($rpcRet['code'] == RpcFactory::CODE_SUCCESS) {
+            return $rpcRet['data'];
+        }
+
         $sql = <<<EOSQL
             /* OrderDao.getOrderExtension */
             SELECT *
@@ -178,6 +219,16 @@ EOSQL;
     }
 
     public function checkOrderSnExists($orderSn) {
+        // 通过rpc获取数据
+        $rpcRet = RpcFactory::factory('order')->callDao(
+            'App\Model\Dao\OrderDao', 
+            'checkOrderSnExists', 
+            [$orderSn]
+        );
+        if ($rpcRet['code'] == RpcFactory::CODE_SUCCESS) {
+            return $rpcRet['data'];
+        }
+
         $sql = <<<EOSQL
             /* OrderDao.checkOrderSnExists */
             SELECT order_id
@@ -201,6 +252,16 @@ EOSQL;
     }
 
     public function checkSkuIdExists($skuItems) {
+        // 通过rpc获取数据
+        $rpcRet = RpcFactory::factory('order')->callDao(
+            'App\Model\Dao\OrderDao', 
+            'checkSkuIdExists', 
+            [$skuItems]
+        );
+        if ($rpcRet['code'] == RpcFactory::CODE_SUCCESS) {
+            return $rpcRet['data'];
+        }
+
         $columns = array();
         foreach ($skuItems as $k => $v) {
             $columns[] = $k . ' = ?';
@@ -230,6 +291,16 @@ EOSQL;
     }
 
     public function checkGStyleIdExists($styleItems) {
+        // 通过rpc获取数据
+        $rpcRet = RpcFactory::factory('order')->callDao(
+            'App\Model\Dao\OrderDao', 
+            'checkGStyleIdExists', 
+            [$styleItems]
+        );
+        if ($rpcRet['code'] == RpcFactory::CODE_SUCCESS) {
+            return $rpcRet['data'];
+        }
+
         $columns = array();
         foreach ($styleItems as $k => $v) {
             $columns[] = $k . ' = ?';
