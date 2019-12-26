@@ -270,7 +270,7 @@ function _save_address()
 	}
 
 	if ($country == 3962/*  && PROJECT_NAME == 'JJsHouse' */) {
-		if ($tax_code_type == 1 && (strlen($tax_code_value) < 11 || !is_numeric($tax_code_value))) {
+		if ($tax_code_type == 1 && (strlen($tax_code_value) < 14 )) {
 			if ($ajax) {
 				echo json_encode(array(
 					'code' => 1,
@@ -280,7 +280,7 @@ function _save_address()
 			} else {
 				alert_back($_LANG['page_common_cpf_code_error_tip'], $_SERVER['REQUEST_URI']);
 			}
-		} elseif ($tax_code_type == 2 && (strlen($tax_code_value) < 14 || !is_numeric($tax_code_value))) {
+		} elseif ($tax_code_type == 2 && (strlen($tax_code_value) < 18 )) {
 			if ($ajax) {
 				echo json_encode(array(
 					'code' => 1,
