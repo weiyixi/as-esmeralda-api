@@ -48,12 +48,13 @@ class Initializer{
         $t = $this;
         $container['tplengine'] = function($c) use ($t){
             $siteConf = $c['siteConf'];
+            $APP_FS_ROOT = $c['APP_FS_ROOT'];
             $twig = new \Slim\Views\Twig();
             $twig->twigTemplateDirs = $t->tplPath();
             $twig->parserOptions = array(
                 'debug' => isset($siteConf['twig.debug']) ? $siteConf['twig.debug'] : false,
                 'strict_variables' => isset($siteConf['twig.strict']) ? $siteConf['twig.strict'] : false,
-                'cache' => isset($siteConf['twig.cache']) ? $siteConf['twig.cache'] : false,
+                'cache' => isset($siteConf['twig.cache']) && $siteConf['twig.cache'] ? $APP_FS_ROOT . $siteConf['twig.cache'] : false,
             );
             $twig->parserExtensions = array(
                 new \Twig_Extension_Debug(),
