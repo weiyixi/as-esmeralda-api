@@ -31,6 +31,11 @@ class PaymentUtil {
      */
     const ANDROID_MIN_VERSION = '2.5.0';
 
+    /**
+     * @var int
+     */
+    const PAYPAL_CREDIT_ID = 9700;
+
     public static function getValidPayments($paymentLang, $currencyCode, $countryCode, $paymentConfigLang = '') {
         global $container, $IMG_PATH;
 
@@ -55,8 +60,8 @@ class PaymentUtil {
             $payments[$dotpayPaymentId]->useTrustPayIcon = 1;
         }
 
+        $descDisabledPayment = Util::conf('desc_disabled_payment', array());
         foreach ($payments as $payment) {
-            $descDisabledPayment = Util::conf('desc_disabled_payment', array());
             if(in_array($payment->payment_id, $descDisabledPayment)) {
                 $payment->payment_desc = '';
             } else {
@@ -127,13 +132,27 @@ class PaymentUtil {
     private static function filterPayment($payments)
     {
         $isApp = Util::conf('isApp', 0);
-        global $web_container;
+        global $web_container, $user_country,$country, $currency;
+
+
+        $countryCode = isset($country) && isset($country->region_code) ? $country->region_code : $user_country->region_code;
+        $isPaypalQuickPayment =
+            !in_array($countryCode,Util::conf('paypal_quick_payment_black_country', [])) &&
+            Util::conf('paypal_quick_payment', false) &&
+            in_array($currency->name,Util::conf('paypal_quick_payment_currency', []));
+
+        if (!$isPaypalQuickPayment && isset($payments[self::PAYPAL_CREDIT_ID])) {
+            unset($payments[self::PAYPAL_CREDIT_ID]);
+        }
+
         if (!$isApp || (!empty($web_container['globals']['IOS_VERSION']) && $web_container['globals']['IOS_VERSION'] < self::IOS_MIN_VERSION) || (!empty($web_container['globals']['ANDROID_VERSION']) && -1 === version_compare($web_container['globals']['ANDROID_VERSION'], self::ANDROID_MIN_VERSION))) {
             return self::getUnTokenPayments($payments);
         }
         $isIos = isset($web_container['globals']['IOS_VERSION']) && !empty($web_container['globals']['IOS_VERSION']);
         $unValidPaymentId = $isIos ? self::GOOGLE_PAY_ID : self::APPLE_PAY_ID;
         unset($payments[$unValidPaymentId]);
+
+
         return $payments;
     }
 
