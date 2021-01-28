@@ -24,12 +24,12 @@ class PaymentUtil {
     /**
      * @var int
      */
-    const IOS_MIN_VERSION = 25;
+    const IOS_MIN_VERSION = 10;
 
     /**
      * @var int
      */
-    const ANDROID_MIN_VERSION = '2.5.0';
+    const ANDROID_MIN_VERSION = '1.0.0';
 
     /**
      * @var int
